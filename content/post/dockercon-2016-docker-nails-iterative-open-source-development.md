@@ -1,0 +1,27 @@
++++
+author = "Andreas Mosti"
+date = 2016-06-21T08:52:47Z
+description = ""
+draft = false
+slug = "dockercon-2016-docker-nails-iterative-open-source-development"
+title = "DockerCon 2016: Docker nails iterative open source development"
+
++++
+
+
+Yesterday [DockerCon 2016](http://2016.dockercon.com/) kicked off from rainy Seattle with a brilliant keynote lead by CEO [Ben Golub](https://twitter.com/golubbe) and CTO [Solomon Hykes](https://twitter.com/solomonstre). Hykes talked about how Docker's goal is to make [tools of mass innovation](https://www.youtube.com/watch?v=apOEYhmskvQ), to remove as much friction as possible from the development workflow. One such example is [Docker for Mac and Windows](https://blog.docker.com/2016/03/docker-for-mac-windows-beta/). [Anand Prasad](https://twitter.com/AanandPrasad) came on stage as an "First day on the job" developer to demonstrate how Docker for Mac could help him get up and running, debugging and committing code - 10 minutes in on the new job.
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Live de-bugging inside a container with <a href="https://twitter.com/docker">@docker</a> for Mac and Windows by <a href="https://twitter.com/AanandPrasad">@AanandPrasad</a> <a href="https://twitter.com/hashtag/dockercon?src=hash">#dockercon</a> <a href="https://t.co/zAUvVUOEc5">pic.twitter.com/zAUvVUOEc5</a></p>&mdash; Betty Junod (@BettyJunod) <a href="https://twitter.com/BettyJunod/status/744935919673708544">June 20, 2016</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+>As a beta user of Docker for Mac, I am really happy with how simple Docker has made this use case. With bringing Native Docker (or at least [close to native](https://blog.docker.com/2016/03/docker-for-mac-windows-beta/)) I have been able to bypass the Vagrant machine I have been using for running Docker - saving me a lot of overhead. Docker for Mac also gives me the option to run apps and throw them away when done. Great for my laptop. No more clutter with different MySQL databases in the same instance, just run the entire database in it's own container.
+
+The big "wow" experience came with the introduction of the [new built-in orchestration](https://blog.docker.com/2016/06/docker-1-12-built-in-orchestration/). It is now possible to add hosts to a cluster and deploy containers to this cluster - with as little as 3 CLI commands, with just the Docker-Engine installed. Switch out the familiar ``run`` command with ``service`` and you are all set. This cluster is secure, self-healing and load balanced out of the box. This is in many ways what [Docker Swarm](https://docs.docker.com/swarm/overview/) should have been from the start. The new orchestration tool is also a great example of the mantra to remove friction from the development process. Docker has become really good at fixing the really hard parts and hiding them behind a simple CLI.
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">on stage: <a href="https://twitter.com/mikegoelzer">@mikegoelzer</a> and <a href="https://twitter.com/aluzzardi">@aluzzardi</a> launching service live with <a href="https://twitter.com/docker">@docker</a> 1.12 <a href="https://twitter.com/hashtag/DockerCon?src=hash">#DockerCon</a> <a href="https://t.co/dvItYBDeI0">pic.twitter.com/dvItYBDeI0</a></p>&mdash; Docker (@docker) <a href="https://twitter.com/docker/status/744943959177199616">June 20, 2016</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+What the keynote shows is how good Docker is at doing Iterative Open Source development out in the open. When Docker first released it was a much simpler way to use ``namespacing`` and ``cgroups`` to isolate processes from each other. Great for testing and Linux based development, making it possible to set up a reproducible application. With the containers (or building blocks) came the need for orchestration. What use is a hundred containerized apps if it is a pain to orchestrate them? Since Docker has been Open Source from day one, many problems has been addressed by others. The [Fig Project](http://www.fig.sh/) (now Docker Compose) solved orchestration on the development level. Docker [acquired the team behind Fig](http://www.informationweek.com/cloud/infrastructure-as-a-service/docker-acquires-devops-flavor-with-fig/d/d-id/1297523) and put them in charge for development of Docker Compose.
+
+Next up came the split of the Docker application into the Docker Engine, the Client and the Machine. The Engine is the part that runs Docker, the client talks to it via the CLI. Docker Machine lets you install the Docker-Engine on multiple hosts and controls them with the client, making deployment on remote hosts much easier. The final product to come out of last year's DockerCon was Docker Swarm. Swarm enables multiple Docker Machines to function together as a cluster.
+
+These products are results of the Docker iteration process. By attacking different challenges one at the time, Docker gives us tools that are adapted to specific needs. These tools can be built upon in the next iteration to tackle another challenge by another group of people. There would not have been a Docker-Engine or Docker-Compose without Docker itself. Docker Machine could not have been made without the Docker Engine. No Machine, no Swarm. Without Swarm? Certainly no [Docker-Cloud](https://www.docker.com/products/docker-cloud).

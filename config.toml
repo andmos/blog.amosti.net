@@ -1,0 +1,25 @@
+baseURL = "https://blog.amosti.net"
+disablePathToLower = true
+languageCode = "en-us"
+title = "Dev&Ops"
+author = "Andreas Mosti"
+
+theme = "paper"
+
+[menu]
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About Andreas"
+    url = "/about/"
+    weight = 10
+
+[params]
+  disableHLJS = true                 # don't use highlight.js
+  twitter = 'amostii'                # twitter.com/YOUR_TWITTER_ID
+  github = 'andmos'                  # github.com/YOUR_GITHUB_ID
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
