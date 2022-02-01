@@ -7,12 +7,14 @@ author = "Andreas Mosti"
 theme = "paper"
 
 [menu]
-
   [[menu.main]]
     identifier = "about"
     name = "About Andreas"
     url = "/about/"
     weight = 10
+
+[permalinks]
+  post = "/:slug"
 
 [params]
   disableHLJS = true                 # don't use highlight.js
