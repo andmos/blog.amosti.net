@@ -1,0 +1,98 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Containerize FluentMigrator for effortless db migrations - Dev&Ops</title>
+<meta name=description content="Continuing the containerization Last year I wrote about how to set up a local reverse proxy with nginx and mkcert via Docker-Compose. Being able to spin up a local, production-like reverse proxy to use while developing is great, but why stop there?
+Sooner or later the need for a database to store the applications data will emerge, and with any data structure, the need for change - adding, updating or deleting elements of the structure is needed.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="Containerize FluentMigrator for effortless db migrations">
+<meta property="og:description" content="Continuing the containerization Last year I wrote about how to set up a local reverse proxy with nginx and mkcert via Docker-Compose. Being able to spin up a local, production-like reverse proxy to use while developing is great, but why stop there?
+Sooner or later the need for a database to store the applications data will emerge, and with any data structure, the need for change - adding, updating or deleting elements of the structure is needed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/containerize-fluentmigrator-for-effortless-db-migrations/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2021-02-21T10:50:17+00:00">
+<meta property="article:modified_time" content="2021-02-21T10:50:17+00:00">
+<meta itemprop=name content="Containerize FluentMigrator for effortless db migrations">
+<meta itemprop=description content="Continuing the containerization Last year I wrote about how to set up a local reverse proxy with nginx and mkcert via Docker-Compose. Being able to spin up a local, production-like reverse proxy to use while developing is great, but why stop there?
+Sooner or later the need for a database to store the applications data will emerge, and with any data structure, the need for change - adding, updating or deleting elements of the structure is needed."><meta itemprop=datePublished content="2021-02-21T10:50:17+00:00">
+<meta itemprop=dateModified content="2021-02-21T10:50:17+00:00">
+<meta itemprop=wordCount content="577">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Containerize FluentMigrator for effortless db migrations">
+<meta name=twitter:description content="Continuing the containerization Last year I wrote about how to set up a local reverse proxy with nginx and mkcert via Docker-Compose. Being able to spin up a local, production-like reverse proxy to use while developing is great, but why stop there?
+Sooner or later the need for a database to store the applications data will emerge, and with any data structure, the need for change - adding, updating or deleting elements of the structure is needed.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>Feb 21, 2021</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>Containerize FluentMigrator for effortless db migrations</h1>
+</header>
+<section class=post-content><h2 id=continuing-the-containerization>Continuing the containerization</h2>
+<p>Last year I wrote about how to set up <a href=https://blog.amosti.net/local-reverse-proxy-with-nginx-mkcert-and-docker-compose/>a local reverse proxy with nginx and mkcert via Docker-Compose</a>.
+Being able to spin up a local, production-like reverse proxy to use while developing is great, but why stop there?</p>
+<p>Sooner or later the need for a database to store the applications data will emerge, and with any data structure, the need for change - adding, updating or deleting elements of the structure is needed. In other words, the need for <em>migrations</em>.</p>
+<p>Back in the day, a usual practice for a team depending on a database (depending on the complexity of the application and maturity of the team), was to share a database instance for development. Setting up a local database can be tricky, and up until 2017 Microsoft&rsquo;s <a href=https://blogs.microsoft.com/blog/2016/03/07/announcing-sql-server-on-linux/>SQL Server was only available on the Windows platform</a>, requiring a VM for local development for *nix users. The single, shared instance strategy is also quite limiting for teams working in parallel on tasks requiring database and / or application code changes. A developer testing a database change on a single branch can easily break the main branch when a single instance is used.</p>
+<p>In 2017 Microsoft release SQL Server 2017 (and now 2019) with Linux support, and with it, thankfully, <a href=https://hub.docker.com/_/microsoft-mssql-server>Docker support</a>.</p>
+<p>A clean instance of MS SQL 2019 can be added to a <code>docker-compose</code> setup as easily as this:</p>
+<script src=https://gist.github.com/andmos/ec3838d72ea0e6137e9798f267ee59b4.js></script>
+<p>With <code>docker-compose</code>, every developer on a team can have their own version of the database.</p>
+<h2 id=running-migrations-with-fluentmigrator>Running migrations with FluentMigrator</h2>
+<p>The next step is bootstrapping the structure of the database. For .NET, <a href=https://docs.microsoft.com/en-us/ef/>Entity Framework</a> or <a href=https://fluentmigrator.github.io/>FluentMigrator</a> are popular choices. Let&rsquo;s focus on FluentMigrator.</p>
+<p>A common pattern for handling migrations is creating a dedicated .NET <code>csproj</code> file where the migrations live. Let&rsquo;s call it <code>MyApp.Migrations</code>.
+After <a href="https://fluentmigrator.github.io/articles/quickstart.html?tabs=runner-in-process">writing some migrations</a>, the easiest way of running them is via the FluentMigrator <a href=https://fluentmigrator.github.io/articles/runners/dotnet-fm.html>dotnet tool dotnet-fm</a>. With <code>dotnet-fm</code>, running migrations is as easy as</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>dotnet-fm migrate --processor SqlServer2016 --assembly MyApp.Migrations.dll --connection <span style=color:#e6db74>&#34;Data Source=myConnectionString&#34;</span><span style=color:#e6db74>`</span>
+</code></pre></div><h2 id=bootstrapping-the-database-with-docker-compose>Bootstrapping the database with Docker-Compose</h2>
+<p>Now we have a <code>docker-compose</code> containing an MS SQL instance, and we have a <code>csproj</code> file containing some database migrations. To save us from having to run the migrations manually, the process of bootstrapping the development environment can be automated by containerizing the process running the migrations. For this, we create a <code>Dockerfile</code> that compiles the migration project, grabs the <code>dotnet-fm</code> tool for running FluentMigrator and wraps it up with an <code>entrypoint</code> for running.</p>
+<p>The <code>Dockerfile</code>:</p>
+<script src=https://gist.github.com/andmos/b33e2f07b6b1ceb8b9e6e6bfe074f5d6.js></script>
+<p>Some things to notice here.</p>
+<p>The FluentMigrator library (installed with NuGet) and the <code>dotnet-fm</code> tool needs to be the same version, so the <code>sed</code> command on line 7 grabs the version-string from the <code>csproj</code> file and uses it to install the correct version of <code>dotnet-fm</code> tool on line 9.</p>
+<p>On line 12 a little shell-script called <code>wait-for</code> is cloned. <a href=wait-for>https://github.com/eficode/wait-for.git</a> is used to wrap the execution of <code>dotnet-fm</code> and <em>wait</em> for the database the become available. This is a neat trick to handle the timing issues that can occur when running via <code>docker-compose</code>, where the migrations can be executed before the database is ready.</p>
+<p>The <code>Dockerfile</code> is multi-stage, so the compiled library, <code>dotnet-fm</code> binary and <code>wait-for</code> script is copied to a <code>dotnet</code> runtime image. The <code>netcat</code> package installed on line 17 is a runtime dependency for <code>wait-for</code>.</p>
+<p>With the <code>Dockerfile</code> in place, the final <code>docker-compose.yaml</code> file:</p>
+<script src=https://gist.github.com/andmos/cc5d63023d68cdfad5de953fcdc22c78.js></script>
+<p>The whole thing spins up with <code>docker-compose up</code>. When <code>db</code> is ready, the migrations will be run and bootstraps the database.</p>
+</section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/deterministic-systems-with-nix/><span>←</span><span>Deterministic systems with Nix</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/cross-post-take-argo-cd-for-a-spin-with-k3s-and-k3d/><span>Cross post: Take Argo CD for a spin with K3s and k3d</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>

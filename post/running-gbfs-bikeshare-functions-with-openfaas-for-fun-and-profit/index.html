@@ -1,0 +1,154 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Running GBFS bikeshare functions with OpenFaaS for fun and profit - Dev&Ops</title>
+<meta name=description content="Intro Micro-mobility has gotten a lot of hype over the last couple of years. In many cities all over the world rentable city bikes, cargo bikes and electrical scooters has popped out and seriously changed the way people move, and it doesn&rsquo;t look like you can spell &ldquo;smart city&rdquo; without micro-mobility. The consulting company McKinsey is estimating that the value of the micro-mobility market will reach a value of $200 billion to $300 billion in the United States in 2030.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="Running GBFS bikeshare functions with OpenFaaS for fun and profit">
+<meta property="og:description" content="Intro Micro-mobility has gotten a lot of hype over the last couple of years. In many cities all over the world rentable city bikes, cargo bikes and electrical scooters has popped out and seriously changed the way people move, and it doesn&rsquo;t look like you can spell &ldquo;smart city&rdquo; without micro-mobility. The consulting company McKinsey is estimating that the value of the micro-mobility market will reach a value of $200 billion to $300 billion in the United States in 2030.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/running-gbfs-bikeshare-functions-with-openfaas-for-fun-and-profit/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2019-06-04T18:22:59+00:00">
+<meta property="article:modified_time" content="2019-06-04T18:22:59+00:00">
+<meta itemprop=name content="Running GBFS bikeshare functions with OpenFaaS for fun and profit">
+<meta itemprop=description content="Intro Micro-mobility has gotten a lot of hype over the last couple of years. In many cities all over the world rentable city bikes, cargo bikes and electrical scooters has popped out and seriously changed the way people move, and it doesn&rsquo;t look like you can spell &ldquo;smart city&rdquo; without micro-mobility. The consulting company McKinsey is estimating that the value of the micro-mobility market will reach a value of $200 billion to $300 billion in the United States in 2030."><meta itemprop=datePublished content="2019-06-04T18:22:59+00:00">
+<meta itemprop=dateModified content="2019-06-04T18:22:59+00:00">
+<meta itemprop=wordCount content="1303">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Running GBFS bikeshare functions with OpenFaaS for fun and profit">
+<meta name=twitter:description content="Intro Micro-mobility has gotten a lot of hype over the last couple of years. In many cities all over the world rentable city bikes, cargo bikes and electrical scooters has popped out and seriously changed the way people move, and it doesn&rsquo;t look like you can spell &ldquo;smart city&rdquo; without micro-mobility. The consulting company McKinsey is estimating that the value of the micro-mobility market will reach a value of $200 billion to $300 billion in the United States in 2030.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>Jun 4, 2019</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>Running GBFS bikeshare functions with OpenFaaS for fun and profit</h1>
+</header>
+<section class=post-content><h2 id=intro>Intro</h2>
+<p>Micro-mobility has gotten a lot of hype over the last couple of years. In many cities all over the world rentable city bikes, cargo bikes and electrical scooters has popped out and seriously changed the way people move, and it doesn&rsquo;t look like you can <a href="https://companies.bnpparibasfortis.be/en/article?n=will-micro-mobility-redesign-the-smart-city">spell &ldquo;smart city&rdquo; without micro-mobility</a>. The consulting company McKinsey is estimating that the value of the micro-mobility market will reach a <a href=https://www.mckinsey.com/industries/automotive-and-assembly/our-insights/micromobilitys-15000-mile-checkup>value of $200 billion to $300 billion in the United States in 2030</a>. What gives micro-mobility systems advantage is the accessability and digital-first approach providers have taken. Most bikeshare systems are activated via smartphones, and the bikes themselves are IoT devices producing data <a href=https://urbansharing.com/>for the providers</a> or <a href=https://trondheimbysykkel.no/en/open-data>the public</a> to explore. To make micro-mobility more useful interoperability is important, and many standards have surfaced. One of these is the <a href=https://github.com/NABSA/gbfs>General Bikeshare Feed Specification</a> (GBFS).</p>
+<h2 id=general-bikeshare-feed-specification-gbfs-and-use-cases>General Bikeshare Feed Specification (GBFS) and use cases</h2>
+<p>GBFS is an open data standard for bikeshare systems developed by <a href=http://www.nabsa.net>North American Bikeshare Association</a>. GBFS provides info about the system itself, including real-time data like available stations, capacity, available bikes and locks etc. This API can be freely used to build 3rd party systems or apps. <a href=https://github.com/andmos/BikeDashboard>How about a dashboard that shows your closest station and local weather forecast</a>, or <a href=https://github.com/gffny/blue-bike-skill>Amazon Echo skill to check for available bikes</a>?
+The <a href=https://github.com/NABSA/gbfs/blob/master/systems.csv>GBFS systems overiew</a> currently contains 228 providers using GBFS.</p>
+<p>A search for GBFS <a href=https://github.com/topics/gbfs>on github topics</a> shows a lot of project integrating with the standard, including my <a href=https://github.com/andmos/BikeshareClient>GBFS Bikeshare client for dotnet</a>. This client is a great starting point for exploring several exiting concepts: serverless and function as a service.</p>
+<h2 id=serverless-function-as-a-service-and-openfaas>Serverless, function as a service and OpenFaaS</h2>
+<p><a href=https://martinfowler.com/articles/serverless.html>Serverless architecture</a> comes as a result of the rising popularity of cloud computing, where providers like Google, Microsoft and Amazon have raised the abstraction level when deploying software. At the infrastructure as a service (IaaS) level you have to mange VMs, the platform as a service (PaaS) level want your binaries or containers, while the function as a service (FaaS) provider needs one thing: your code. The runtime, scalability etc. Is taken care of by the cloud vendor.</p>
+<p>FaaS can be looked at as breaking up the <a href=https://martinfowler.com/articles/microservices.html>microservice pattern</a> into smaller pieces. Examples of functions can be transforming input data and store it in a database, resize images, handle messages on a queue or, to stay in the micro-mobility domain, check the availability status on a bikeshare station.</p>
+<p>The biggest criticism directed at serverless and FaaS is vendor lock-in. Amazon has Lambda, Microsoft has Azure Functions, and Google has Cloud Functions. Since these platforms require plain code to run, some platform specific boilerplate or project types are needed for each platform, thus not contributing to portability between vendors.</p>
+<p>So vendor lock-in is one thing, but I would also like the possibility to run a serverless FaaS solution on that old VMWare cluster in the basement, the Mac mini rack or on the Raspberry Pi spotted in the wild. Luckily, <a href=https://www.openfaas.com/>OpenFaaS</a> is here to help. OpenFaaS is a framework that leverages container technology to run functions in containers on top of orchestrators like Docker Swarm and Kubernetes. This breaks the FaaS architecture free from the cloud vendors, providing the freedom to deploy serverless application in any environment offering a container orchestrator.</p>
+<p><img src=https://pbs.twimg.com/media/DFrkF4NXoAAJwN2.jpg alt="OpenFaaS architecture">
+The OpenFaaS architecture.</p>
+<h2 id=babys-first-gbfs-bikeshare-functions>Baby&rsquo;s first GBFS bikeshare functions</h2>
+<p>So let&rsquo;s put OpenFaaS to work and build some GBFS powered bikeshare functions.</p>
+<p>For development purposes, running OpenFaaS via Docker Swarm is a good approach.
+<a href=https://docs.openfaas.com/deployment/docker-swarm/>The installation of OpenFaaS and initialization of a Swarm cluster is straight forward</a>.</p>
+<p>My preferred language is <code>C#</code> and <code>dotnet core</code>, so to write the <code>dotnet</code> function a <a href=https://docs.openfaas.com/cli/templates/#templates>template</a> is needed.
+Github user <a href=https://github.com/burtonr>burtonr</a> has written a nice <a href=https://github.com/burtonr/csharp-kestrel-template>dotnet template</a> with Kestrel and async support, perfect for high performance HTTP functions. To fetch the template:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ faas-cli template pull https://github.com/burtonr/csharp-kestrel-template
+</code></pre></div><p>Next, let&rsquo;s have a look at what a typical function might look like. The <a href=https://github.com/NABSA/gbfs/blob/master/systems.csv>GBFS systems list</a> is currently in <code>CSV</code> format, but I prefer to abstract it away and offer it as <code>JSON</code> via HTTP endpoint.</p>
+<p>To create a new OpenFaaS function:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ faas-cli new --lang csharp-kestrel gbfs-systems-function
+Function created in folder: gbfs-systems-function
+Stack file written: gbfs-systems-function.yml
+</code></pre></div><p>As the output shows, a folder for the function and <code>stack</code> file are now created, next to the template.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ tree
+.
+├── gbfs-systems-function
+│   ├── FunctionHandler.cs
+│   └── FunctionHandler.csproj
+├── gbfs-systems-function.yml
+└── template
+    └── csharp-kestrel
+        ├── Dockerfile
+        ├── Program.cs
+        ├── Startup.cs
+        ├── <span style=color:#66d9ef>function</span>
+        │   ├── FunctionHandler.cs
+        │   └── FunctionHandler.csproj
+        ├── root.csproj
+        └── template.yml
+</code></pre></div><p>To write the function, <code>gbfs-systems-function/FunctionHandler.cs</code> is edited. Here is the full function:</p>
+<script src=https://gist.github.com/andmos/13822f83e76cfab2b764d40f6ca884e8.js></script>
+<p>The <code>Handle</code> method is entrypoint for the function. In this case the input is not validated, but upon triggering the function parses the <code>systems.csv</code> file and serializes it as JSON.</p>
+<p>To build and deploy the function, take a look at the <code>stack</code> file:</p>
+<script src=https://gist.github.com/andmos/5f8244497cf2bf36687d14d8ffdb3e7d.js></script>
+<p>Notice the <code>image:</code> tag. Since OpenFaaS runs functions in Docker containers, this is the name of the container image that is created, and is the artifact of the build.</p>
+<p>To build, deploy and trigger the function:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ faas-cli build -f gbfs-systems-function.yml
+$ faas-cli deploy -f gbfs-systems-function.yml
+
+$ echo <span style=color:#e6db74>&#34;&#34;</span> |faas-cli invoke gbfs-systems-function <span style=color:#75715e># or via Curl</span>
+$ curl -d <span style=color:#e6db74>&#34;&#34;</span> localhost:8080/function/gbfs-systems-function
+</code></pre></div><p>The two last commands will return <code>JSON</code> straight from the new function.</p>
+<p>To push the image to <a href=https://hub.docker.com/>Docker hub</a>:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ faas-cli push -f gbfs-systems-function.yml
+</code></pre></div><h2 id=building-a-gbfs-powered-slack-bot>Building a GBFS powered Slack bot</h2>
+<p>So that example function was rather simple. Let&rsquo;s make something more useful: A Slack bot for showing available bikes and locks at bikeshare stations. Right off the bat this seems like a nice use case for multiple functions, since a function should optimally do only one thing. So for the bot we need a <code>bikeshare-function</code> that takes the name of a bikeshare systems station as input, and return the number of available bikes and locks for this station as output.</p>
+<p>Not much code needed here neither:</p>
+<script src=https://gist.github.com/andmos/a8116f0121bd8e75d4d3371a01642775.js></script>
+<p>To link the function ta a GBFS system, the GBFS discovery URL must be exposed to the function via environment variable in the <code>stack</code> file.</p>
+<p>When deployed, the <code>bikeshare-function</code> can be invoked:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ curl -d <span style=color:#e6db74>&#34;skansen&#34;</span> localhost:8080/function/bikeshare-function
+<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;Name&#34;</span>:<span style=color:#e6db74>&#34;Skansen&#34;</span>,<span style=color:#e6db74>&#34;BikesAvailable&#34;</span>:19,<span style=color:#e6db74>&#34;LocksAvailable&#34;</span>:2<span style=color:#f92672>}</span>
+</code></pre></div><p>The next function is the Slack bot itself. The bot will trigger on mentions and call the <code>bikeshare-function</code> with a bikeshare station name. For creating Slack apps, <a href=https://api.slack.com/slack-apps>see the documentation</a>.</p>
+<p>As expected, under 100 lines of code here too:</p>
+<script src=https://gist.github.com/andmos/6e992d653377f7bb934ddb817cf47388.js></script>
+<p>Now there are a couple of things to notice here.
+For the bot to be able to call the <code>bikeshare-function</code>, it needs to know where the <a href=https://docs.openfaas.com/architecture/gateway/>OpenFaaS API gateway</a> is. When running via Docker Swarm this address defaults to <code>http://gateway:8080/</code>, but it is <a href=https://github.com/openfaas/workshop/blob/master/lab4.md#call-one-function-from-another>recommended to make this address customizable</a>, as it may vary from environment to environment and other orchestrators.</p>
+<p>The next thing to notice is secrets. The bot needs a OAUTH token when connecting to Slack, and this token should be kept secret. OpenFaaS <a href=https://docs.openfaas.com/reference/secrets/>integrates with Swarm and Kubernetes secrets</a>, both reachable from <code>openfaas-cli</code>:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ faas-cli secret create secret-api-key <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --from-file<span style=color:#f92672>=</span>slackToken.txt
+</code></pre></div><p>The token is then written to a file inside the container that must be read up:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>var</span> botToken = File.ReadAllText(<span style=color:#e6db74>@&#34;/var/openfaas/secrets/bikeBotSlackToken&#34;</span>);
+</code></pre></div><p>The final <code>stack</code> file:</p>
+<script src=https://gist.github.com/andmos/b7037ab2266393737db10097366bc20f.js></script>
+<p>To initialize the Slack bot:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ curl -d <span style=color:#e6db74>&#34;&#34;</span> localhost:8080/function/bikeshare-slack-function
+Bot initializing
+</code></pre></div><p>The bot is now online and can be asked for station status:</p>
+<img width=651 alt="Skjermbilde 2019-06-04 kl  22 00 29" src=https://user-images.githubusercontent.com/1283556/58909797-4d732c00-8714-11e9-8bf6-026fe7e1dff5.png>
+<h2 id=conclusion>Conclusion</h2>
+<p>It is exiting times for micro-mobility and the city of the future. For solutions like bikeshare systems to reach it&rsquo;s potential and help cities become more accessible, integration with other smart city systems is almost a requirement. Thanks to open standards like GBFS and the serverless paradigm, creating new application leveraging and combining data is only a couple of code lines away. Frameworks like OpenFaaS helps democratize serverless and FaaS, giving developers tools to run functions where and how they want.</p>
+<p>Finally, all code for this post <a href=https://github.com/andmos/BikeshareFunction>can be found on Github.</a>.</p>
+</section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/github-actions-and-publishing-artifacts-to-azure-blob-storage/><span>←</span><span>Github Actions and publishing artifacts to Azure Blob Storage</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/code-coverage-for-dotnet-core-with-coverlet-multistage-dockerfile-and-codecov-io/><span>Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>

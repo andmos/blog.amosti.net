@@ -1,0 +1,136 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Regression test Ansible Playbooks with Packer - Dev&Ops</title>
+<meta name=description content="Some people still live in a pre-Kubernetes world, installing infrastructure components directly on VMs. Some still hold on to the old and boring, but still going, vmware cluster from 5 - 10 years ago. And hey, there is nothing wrong with that.
+We still have this setup at work, but thanks to Ansible, it feels like a private cloud at the IaaS level. When a development, QA or production environment is created, the CI system runs nightly provisioning against these servers.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="Regression test Ansible Playbooks with Packer">
+<meta property="og:description" content="Some people still live in a pre-Kubernetes world, installing infrastructure components directly on VMs. Some still hold on to the old and boring, but still going, vmware cluster from 5 - 10 years ago. And hey, there is nothing wrong with that.
+We still have this setup at work, but thanks to Ansible, it feels like a private cloud at the IaaS level. When a development, QA or production environment is created, the CI system runs nightly provisioning against these servers.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/regression-test-ansible-playbooks-with-packer/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2018-08-03T09:37:08+00:00">
+<meta property="article:modified_time" content="2018-08-03T09:37:08+00:00">
+<meta itemprop=name content="Regression test Ansible Playbooks with Packer">
+<meta itemprop=description content="Some people still live in a pre-Kubernetes world, installing infrastructure components directly on VMs. Some still hold on to the old and boring, but still going, vmware cluster from 5 - 10 years ago. And hey, there is nothing wrong with that.
+We still have this setup at work, but thanks to Ansible, it feels like a private cloud at the IaaS level. When a development, QA or production environment is created, the CI system runs nightly provisioning against these servers."><meta itemprop=datePublished content="2018-08-03T09:37:08+00:00">
+<meta itemprop=dateModified content="2018-08-03T09:37:08+00:00">
+<meta itemprop=wordCount content="512">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Regression test Ansible Playbooks with Packer">
+<meta name=twitter:description content="Some people still live in a pre-Kubernetes world, installing infrastructure components directly on VMs. Some still hold on to the old and boring, but still going, vmware cluster from 5 - 10 years ago. And hey, there is nothing wrong with that.
+We still have this setup at work, but thanks to Ansible, it feels like a private cloud at the IaaS level. When a development, QA or production environment is created, the CI system runs nightly provisioning against these servers.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>Aug 3, 2018</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>Regression test Ansible Playbooks with Packer</h1>
+</header>
+<section class=post-content><p>Some people still live in a pre-Kubernetes world, installing infrastructure components directly on VMs.
+Some still hold on to the old and boring, but still going, vmware cluster from 5 - 10 years ago. And hey, there is nothing wrong with that.</p>
+<p>We still have this setup at work, but thanks to Ansible, it feels like a private cloud at the IaaS level.
+When a development, QA or production environment is created, the CI system runs nightly provisioning against these servers.</p>
+<p>This makes sure that all servers are up to date with the latest roles and fixes added to the playbooks.
+This is all good, but one thing it doesn&rsquo;t fully protect against is regression in the playbooks. Most tasks (as they should be!) does not download the Java installer if Java is already in place on the server, or do a clean install with configuration of RabbitMQ if RabbitMQ is up and running smoothly. Unless the environments are recycled often, you can never be <em>quite</em> sure that the Ansible playbooks and server setup will still work on the next clean install.</p>
+<p>Enter regression tests, and enter Packer.</p>
+<p>I&rsquo;m about 5000 years late to the Packer party, but damn Hashicorp delivers as always.
+If you haven&rsquo;t heard about Packer, it is a tool for building up and packing artifacts, mostly VMs (or containers) that can be delivered to a cloud provider. Or in this case, work against vsphere.
+The normal Packer flow is to build up a VM from an ISO file with vmware player or workstation under the hood, run some
+provisioning and then upload the artifact to vsphere.
+For my regression tests, I don&rsquo;t want all this overhead. The good guys over at Jetbrains has developed a <a href=https://github.com/jetbrains-infra/packer-builder-vsphere>plugin</a> for Packer that supports working directly with VMs or templates in the vpshere cluster itself, so the VMs can be created directly in the cluster.</p>
+<p>The following Packer configuration creates a VM from a bare minimum CentOS template, before running the RabbitMQ playbook. If anything goes wrong, Packer throws an exit code and deletes the temporary machine. Throw it all in for a nightly build, and we can now be confident that the playbook will work the next time we need to set up a RabbitMQ server.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-JSON data-lang=JSON>{
+  <span style=color:#f92672>&#34;variables&#34;</span>: {
+    <span style=color:#f92672>&#34;vcenter_host&#34;</span>: <span style=color:#e6db74>&#34;vcenter01&#34;</span>,
+    <span style=color:#f92672>&#34;vcenter_user&#34;</span>: <span style=color:#e6db74>&#34;admin@domain.local&#34;</span>,
+    <span style=color:#f92672>&#34;vcenter_password&#34;</span>: <span style=color:#e6db74>&#34;{{env `VCENTERPASS`}}&#34;</span>,
+    <span style=color:#f92672>&#34;ssh_user&#34;</span>: <span style=color:#e6db74>&#34;adminuser&#34;</span>,
+    <span style=color:#f92672>&#34;ssh_private_key_file&#34;</span>: <span style=color:#e6db74>&#34;{{env `HOME`}}//.ssh/id_rsa&#34;</span>,
+    <span style=color:#f92672>&#34;dc&#34;</span>: <span style=color:#e6db74>&#34;Datacenter&#34;</span>,
+    <span style=color:#f92672>&#34;cluster&#34;</span>: <span style=color:#e6db74>&#34;MetroCluster&#34;</span>,
+    <span style=color:#f92672>&#34;template_dir&#34;</span>: <span style=color:#e6db74>&#34;Application Servers/Team Optimus&#34;</span>,
+    <span style=color:#f92672>&#34;resource_pool&#34;</span>: <span style=color:#e6db74>&#34;Team Optimus&#34;</span>,
+    <span style=color:#f92672>&#34;template&#34;</span>: <span style=color:#e6db74>&#34;Ansible_CentOS73Packer&#34;</span>,
+    <span style=color:#f92672>&#34;datastore&#34;</span>:            <span style=color:#e6db74>&#34;hus015sec-dev&#34;</span>,
+    <span style=color:#f92672>&#34;vm_name&#34;</span>:  <span style=color:#e6db74>&#34;Ansible_CentOS73PackerRabbitMq&#34;</span>
+  },
+
+  <span style=color:#f92672>&#34;builders&#34;</span>: [
+    {
+      <span style=color:#f92672>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;RabbitMQ template test&#34;</span>,
+      <span style=color:#f92672>&#34;type&#34;</span>: <span style=color:#e6db74>&#34;vsphere-clone&#34;</span>,
+
+      <span style=color:#f92672>&#34;vcenter_server&#34;</span>:      <span style=color:#e6db74>&#34;{{ user `vcenter_host` }}&#34;</span>,
+      <span style=color:#f92672>&#34;datacenter&#34;</span>:          <span style=color:#e6db74>&#34;{{ user `dc` }}&#34;</span>,
+      <span style=color:#f92672>&#34;cluster&#34;</span>:             <span style=color:#e6db74>&#34;{{ user `cluster` }}&#34;</span>,
+      <span style=color:#f92672>&#34;username&#34;</span>:            <span style=color:#e6db74>&#34;{{ user `vcenter_user` }}&#34;</span>,
+      <span style=color:#f92672>&#34;password&#34;</span>:            <span style=color:#e6db74>&#34;{{ user `vcenter_password` }}&#34;</span>,
+      <span style=color:#f92672>&#34;insecure_connection&#34;</span>: <span style=color:#e6db74>&#34;true&#34;</span>,
+      <span style=color:#f92672>&#34;ssh_username&#34;</span>:        <span style=color:#e6db74>&#34;{{ user `ssh_user` }}&#34;</span>,
+      <span style=color:#f92672>&#34;ssh_private_key_file&#34;</span>:  <span style=color:#e6db74>&#34;{{ user `ssh_private_key_file` }}&#34;</span>,
+      <span style=color:#f92672>&#34;datastore&#34;</span>:            <span style=color:#e6db74>&#34;{{ user `datastore` }}&#34;</span>,
+      <span style=color:#f92672>&#34;resource_pool&#34;</span>: <span style=color:#e6db74>&#34;{{ user `resource_pool` }}&#34;</span>,
+      <span style=color:#f92672>&#34;folder&#34;</span>: <span style=color:#e6db74>&#34;{{ user `template_dir` }}&#34;</span>,
+      <span style=color:#f92672>&#34;template&#34;</span>: <span style=color:#e6db74>&#34;{{ user `template` }}&#34;</span>,
+      <span style=color:#f92672>&#34;vm_name&#34;</span>:  <span style=color:#e6db74>&#34;{{ user `vm_name` }}&#34;</span>,
+      <span style=color:#f92672>&#34;convert_to_template&#34;</span>: <span style=color:#66d9ef>false</span>,
+      <span style=color:#f92672>&#34;communicator&#34;</span>: <span style=color:#e6db74>&#34;ssh&#34;</span>
+    }
+  ],
+
+  <span style=color:#f92672>&#34;provisioners&#34;</span>: [
+    {
+      <span style=color:#f92672>&#34;type&#34;</span>: <span style=color:#e6db74>&#34;ansible&#34;</span>,
+      <span style=color:#f92672>&#34;playbook_file&#34;</span>: <span style=color:#e6db74>&#34;../RabbitMQ.yaml&#34;</span>,
+      <span style=color:#f92672>&#34;host_alias&#34;</span>: <span style=color:#e6db74>&#34;rabbitmq&#34;</span>,
+      <span style=color:#f92672>&#34;ansible_env_vars&#34;</span>: [ <span style=color:#e6db74>&#34;ANSIBLE_HOST_KEY_CHECKING=False&#34;</span> ],
+      <span style=color:#f92672>&#34;extra_arguments&#34;</span>: [ <span style=color:#e6db74>&#34;--verbose&#34;</span> ],
+      <span style=color:#f92672>&#34;user&#34;</span>: <span style=color:#e6db74>&#34;{{ user `ssh_user` }}&#34;</span>
+    }
+  ]
+}
+</code></pre></div></section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/trondheim-developer-conference-2018/><span>←</span><span>Trondheim Developer Conference 2018</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/how-the-sharing-economy-fits-in-to-my-life/><span>How the "sharing economy" fits into my everyday life</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>

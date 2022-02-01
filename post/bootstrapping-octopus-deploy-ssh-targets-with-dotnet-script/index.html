@@ -1,0 +1,107 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Bootstrapping Octopus Deploy SSH targets with dotnet-script - Dev&Ops</title>
+<meta name=description content="Those who use Octopus Deploy probably know about Calamari. In short, Calamari is a console app that functions as the deployment engine on the Octopus Deploy targets machines.
+Calamari is the app that makes sure your NuGet packages, Powershell, Bash, F# scripts etc. Is being executed on the target machine. For Windows the Octopus Tentacle is used by the main Octopus Server to communicate with the deployment targets, eventually installing Calamari on the first deploy.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="Bootstrapping Octopus Deploy SSH targets with dotnet-script">
+<meta property="og:description" content="Those who use Octopus Deploy probably know about Calamari. In short, Calamari is a console app that functions as the deployment engine on the Octopus Deploy targets machines.
+Calamari is the app that makes sure your NuGet packages, Powershell, Bash, F# scripts etc. Is being executed on the target machine. For Windows the Octopus Tentacle is used by the main Octopus Server to communicate with the deployment targets, eventually installing Calamari on the first deploy.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/bootstrapping-octopus-deploy-ssh-targets-with-dotnet-script/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2018-01-03T18:43:46+00:00">
+<meta property="article:modified_time" content="2018-01-03T18:43:46+00:00">
+<meta itemprop=name content="Bootstrapping Octopus Deploy SSH targets with dotnet-script">
+<meta itemprop=description content="Those who use Octopus Deploy probably know about Calamari. In short, Calamari is a console app that functions as the deployment engine on the Octopus Deploy targets machines.
+Calamari is the app that makes sure your NuGet packages, Powershell, Bash, F# scripts etc. Is being executed on the target machine. For Windows the Octopus Tentacle is used by the main Octopus Server to communicate with the deployment targets, eventually installing Calamari on the first deploy."><meta itemprop=datePublished content="2018-01-03T18:43:46+00:00">
+<meta itemprop=dateModified content="2018-01-03T18:43:46+00:00">
+<meta itemprop=wordCount content="594">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Bootstrapping Octopus Deploy SSH targets with dotnet-script">
+<meta name=twitter:description content="Those who use Octopus Deploy probably know about Calamari. In short, Calamari is a console app that functions as the deployment engine on the Octopus Deploy targets machines.
+Calamari is the app that makes sure your NuGet packages, Powershell, Bash, F# scripts etc. Is being executed on the target machine. For Windows the Octopus Tentacle is used by the main Octopus Server to communicate with the deployment targets, eventually installing Calamari on the first deploy.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>Jan 3, 2018</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>Bootstrapping Octopus Deploy SSH targets with dotnet-script</h1>
+</header>
+<section class=post-content><p>Those who use Octopus Deploy probably know about <a href=https://octopus.com/docs/api-and-integration/calamari>Calamari</a>.
+In short, Calamari is a console app that functions as the deployment engine on the Octopus Deploy targets machines.<br>
+Calamari is the app that makes sure your NuGet packages, Powershell, Bash, F# scripts etc. Is being executed on the target machine.
+For Windows the <a href=https://octopus.com/docs/infrastructure/windows-targets>Octopus Tentacle</a> is used by the main Octopus Server to communicate with the deployment targets, eventually installing Calamari on the first deploy.</p>
+<p>This is all good, but what about Linux targets? There is a story here as well. Traditionally Calamari uses full .NET Framework, and can be run via Mono on Linux targets.
+There is no need for a Tentacle process, <a href=https://octopus.com/docs/infrastructure/ssh-targets>plain old SSH</a> is used to invoke a shell script under the hood that in turn invokes Calamari.
+The Mono approach works, but is kind of &ldquo;old and heavy&rdquo; in the new dotnet-core world, so Calamari is now also available as a <a href=https://octopus.com/docs/infrastructure/ssh-targets/self-contained-calamari>stand-alone dotnet-core app!</a>
+The cool thing here is that no software has to be installed at all for Calamari to run (hence self-contained) which makes is much more lightweight and easy to provision.</p>
+<p>Alas, there are some limitations here. Calamari can&rsquo;t run ScriptCS / F# scripts via the self-contained variant since these projects hasn&rsquo;t been targeted for dotnet-core yet. This is quite a bummer since the deployment pipeline we work with contains about 20.000 lines of <code>.CSX</code> code. Quite the investment.</p>
+<p>But, a new hope approaches with the <a href=https://github.com/filipw/dotnet-script>dotnet-script</a> project. As mentioned in another one of my posts, dotnet-script provides C# scripting based on dotnet-core, with full debug support via Visual Studio Code on <em>all</em> OS&rsquo;es, with great features like referencing NuGet packages inline from the scripts. No need for that <code>packages.config</code> file. The only catch is the requirement of the dotnet-core SDK, since dotnet-script uses NuGet and does some compilation behind the scenes. Still better to have a dependency on dotnet than full Mono.</p>
+<p>So, Linux + Calamari + dotnet-script = awesomeness down the road.
+As a PoC, I wrote an example Ansible Playbook that <a href=https://github.com/andmos/ansible-role-dotnet-script>installs dotnet-script</a> on the VM, before it joins the Octopus environment via the SSH target option. To make it all full-circle, The SSH-target bootstrapping script is written in dotnet-script itself, taking advantage of the <a href=https://octopus.com/docs/api-and-integration/octopus.client>octopus.client</a> NuGet package and the beautiful inline NuGet support.</p>
+<p>The script itself is as simple as:</p>
+<script src=https://gist.github.com/andmos/b82dd2771c1db5ac3ff233f4305be465.js></script>
+<p>This script is called via the wrapper shell script:</p>
+<script src=https://gist.github.com/andmos/3e21275d1695d4faff617b79adf4bc2a.js></script>
+<p>And at last, completing it with a thrown-together Ansible role:</p>
+<script src=https://gist.github.com/andmos/6c2d9910c8e89aa95e0331062899469f.js></script>
+<p>When the playbook run completes, the new Linux machine is available in the Octopus environment and dotnet-script is ready to go.
+As of now there are no official support in Calamari for running dotnet-script directly, but <a href=https://github.com/seesharper/Calamari>we are working on that</a> and planning to check the possibilities for adding <code>dotnet-script</code> support upstream in Calamari. It makes much more sense to use a C# script runner that can be executed on all platforms directly, making it easier to have a homogeneous codebase across Windows and Linux targets.</p>
+<p>Another work-around is to create a NuGet package with a wrapper-script to execute dotnet-script. Example:</p>
+<pre tabindex=0><code>NuGetScriptPackage
+│   ├── contentFiles
+│   │   └── csx
+│   │       └── any
+│   │           └── helloworld.csx       
+│   └── tools
+│       └── RunScript.sh
+</code></pre><p>Where the Octopus step points to the <code>RunScript.sh</code> script in the package:</p>
+<pre tabindex=0><code>#! /bin/bash
+
+dotnet script ../content/csx/any/helloworld.csx
+</code></pre><p>But this is no good solutions since it can&rsquo;t handle scripts argument or cross-platform execution in any good manner.</p>
+<p>I believe dotnet-script can be a nice way to go for Octopus Deploy in the future, if it is to take cross-platform deployment seriously.</p>
+</section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/container-structure-tests/><span>←</span><span>Container Structure Tests</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/using-docker-for-executing-ad-hoc-scripts-and-cron-like-jobs/><span>Using Docker for executing ad-hoc scripts and cron-like jobs</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>

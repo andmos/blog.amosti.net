@@ -1,0 +1,211 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>How I broke an API (and how you can do it too!) - Dev&Ops</title>
+<meta name=description content="Disclaimer: The content of this post is not nearly as dramatic as the title will have it, and for a lot of developers it will sound obvious. Based on code I have seen I nonetheless think it can learn a lot of people a valid lesson as well, and hopefully help other avoid the mistakes laziness can lead to.
+ In november last year I wrote about Stratos, a simple web API based on Nancy with the sole purpose of listing out installed Chocolatey packages on a server.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="How I broke an API (and how you can do it too!)">
+<meta property="og:description" content="Disclaimer: The content of this post is not nearly as dramatic as the title will have it, and for a lot of developers it will sound obvious. Based on code I have seen I nonetheless think it can learn a lot of people a valid lesson as well, and hopefully help other avoid the mistakes laziness can lead to.
+ In november last year I wrote about Stratos, a simple web API based on Nancy with the sole purpose of listing out installed Chocolatey packages on a server.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/how-i-broke-an-api-and-how-you-can-do-it-too/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2017-06-08T16:29:00+00:00">
+<meta property="article:modified_time" content="2017-06-08T16:29:00+00:00">
+<meta itemprop=name content="How I broke an API (and how you can do it too!)">
+<meta itemprop=description content="Disclaimer: The content of this post is not nearly as dramatic as the title will have it, and for a lot of developers it will sound obvious. Based on code I have seen I nonetheless think it can learn a lot of people a valid lesson as well, and hopefully help other avoid the mistakes laziness can lead to.
+ In november last year I wrote about Stratos, a simple web API based on Nancy with the sole purpose of listing out installed Chocolatey packages on a server."><meta itemprop=datePublished content="2017-06-08T16:29:00+00:00">
+<meta itemprop=dateModified content="2017-06-08T16:29:00+00:00">
+<meta itemprop=wordCount content="911">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="How I broke an API (and how you can do it too!)">
+<meta name=twitter:description content="Disclaimer: The content of this post is not nearly as dramatic as the title will have it, and for a lot of developers it will sound obvious. Based on code I have seen I nonetheless think it can learn a lot of people a valid lesson as well, and hopefully help other avoid the mistakes laziness can lead to.
+ In november last year I wrote about Stratos, a simple web API based on Nancy with the sole purpose of listing out installed Chocolatey packages on a server.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>Jun 8, 2017</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>How I broke an API (and how you can do it too!)</h1>
+</header>
+<section class=post-content><blockquote>
+<p>Disclaimer: The content of this post is not nearly as dramatic as the title will have it, and for a lot of developers it will sound obvious. Based on code I have seen I nonetheless think it can learn a lot of people a valid lesson as well, and hopefully help other avoid the mistakes laziness can lead to.</p>
+</blockquote>
+<p>In november last year <a href=http://blog.amosti.net/rolling-out-web-services-with-topshelf-chocolatey-and-ansible/>I wrote about Stratos,</a> a simple web API based on Nancy with the sole purpose of listing out installed Chocolatey packages on a server. With this convenient web-process installed on our servers, the team figured out that it would be nice if it also supported <a href=https://github.com/andmos/Stratos/blob/master/doc/Plugin.md>plugins</a>.</p>
+<p>With plugin support we could serve other useful info from the servers via the same API host. So far so good. The story begins when one of my colleagues had to serialize some rather complex objects to JSON. Out of the box Nancy comes with it&rsquo;s own JSON serializer - not using <a href=http://www.newtonsoft.com/json>Json.NET</a> as the rest of the world uses. This serializer did some funny things with his object, so he wanted to use Json.NET. No problem, the Nancy guys offer <a href=https://github.com/NancyFx/Nancy.Serialization.JsonNet>Nancy.Serialization.JsonNet</a> as a NuGet package.
+Just slide the DLL in and Nancy grabs hold of it. God stuff.</p>
+<p>After checking in the updated code the CI build failed on the original Stratos API tests. We expect a JSON on the following format when asking for installed Chocolatey packages:</p>
+<pre tabindex=0><code>[
+  {
+    &quot;packageName&quot;: &quot;chocolatey&quot;,
+    &quot;version&quot;: {
+      &quot;version&quot;: {
+        &quot;major&quot;: 0,
+        &quot;minor&quot;: 10,
+        &quot;build&quot;: 6,
+        &quot;revision&quot;: 1,
+        &quot;majorRevision&quot;: 0,
+        &quot;minorRevision&quot;: 1
+      },
+      &quot;specialVersion&quot;: &quot;&quot;
+    }
+  },
+  {
+    &quot;packageName&quot;: &quot;chocolatey-core.extension&quot;,
+    &quot;version&quot;: {
+      &quot;version&quot;: {
+        &quot;major&quot;: 1,
+        &quot;minor&quot;: 1,
+        &quot;build&quot;: 0,
+        &quot;revision&quot;: 0,
+        &quot;majorRevision&quot;: 0,
+        &quot;minorRevision&quot;: 0
+      },
+      &quot;specialVersion&quot;: &quot;&quot;
+    }
+  }]
+</code></pre><p>And what we got with Json.Net was</p>
+<pre tabindex=0><code>[
+  {
+    &quot;PackageName&quot;: &quot;chocolatey&quot;,
+    &quot;Version&quot;: &quot;0.10.6\r&quot;
+  },
+  {
+    &quot;PackageName&quot;: &quot;chocolatey-core.extension&quot;,
+    &quot;Version&quot;: &quot;1.1.0\r&quot;
+  }
+]
+</code></pre><p>This was quite a surprise. The two JSON serializers were acting quite differently.</p>
+<p>The original object should be quite simple:</p>
+<pre tabindex=0><code>using NuGet;
+
+namespace Stratos.Model
+{
+    public class NuGetPackage
+    {
+        public string PackageName { get; set;}
+        public SemanticVersion Version { get; set; }
+    }
+}
+</code></pre><p>Right of the bat this should be no problem right?
+Trying to debug this a thought struck me: the only place I need <code>NuGet.Core</code> is in this object, to have a <code>SemanticVersion</code> object. <a href=https://github.com/NuGet/NuGet2/blob/2.13/src/Core/SemanticVersion.cs>If we look at the SemanticVersion class</a> there are a lot of stuff there that could mess up the JSON serializer. Not owning the class ourself also prevent us from using things like DataMember attributes to control what parts of the object should be serialized. Another quite lazy choice here is to use the <code>SemanticVersion</code> object itself as a model property. There is a lot of dead weight on the object we don&rsquo;t need. A better choice is to wrap the parts we need in it&rsquo;s own object:</p>
+<pre tabindex=0><code>namespace Stratos.Model
+{
+    public class PackageVersion
+    {
+        public Version Version { get; set; }
+        public string SpecialVersion { get; set; }
+
+    }
+}
+</code></pre><p>And use it in the original object:</p>
+<pre tabindex=0><code>namespace Stratos.Model
+{
+	public class NuGetPackage
+	{
+		public string PackageName { get; set;}
+		public PackageVersion Version { get; set; }
+	}
+}
+</code></pre><p>To get rid of the NuGet reference, the <code>SemanticVersion</code> class got duplicated in. It is much better to own that logic ourself.</p>
+<p>With this refactoring the JSON response looked a lot better:</p>
+<pre tabindex=0><code>[
+  {
+    &quot;PackageName&quot;: &quot;chocolatey&quot;,
+    &quot;Version&quot;: {
+      &quot;Version&quot;: {
+        &quot;Major&quot;: 0,
+        &quot;Minor&quot;: 10,
+        &quot;Build&quot;: 6,
+        &quot;Revision&quot;: 1,
+        &quot;MajorRevision&quot;: 0,
+        &quot;MinorRevision&quot;: 1
+      },
+      &quot;SpecialVersion&quot;: &quot;&quot;
+    }
+  },
+  {
+    &quot;PackageName&quot;: &quot;chocolatey-core.extension&quot;,
+    &quot;Version&quot;: {
+      &quot;Version&quot;: {
+        &quot;Major&quot;: 1,
+        &quot;Minor&quot;: 1,
+        &quot;Build&quot;: 0,
+        &quot;Revision&quot;: 0,
+        &quot;MajorRevision&quot;: 0,
+        &quot;MinorRevision&quot;: 0
+      },
+      &quot;SpecialVersion&quot;: &quot;&quot;
+    }
+  },
+</code></pre><p>Cool, let&rsquo;s ship it!</p>
+<p>An hour later, we had 25 systems that consumed this API die. What had gone wrong? The observant reader have seen it already:</p>
+<p><code>packageName</code> vs. <code>PackageName</code>. Lowercase, uppercase. The Nancy serializer lowercases the keys by default, while Json.Net don&rsquo;t.</p>
+<p>Why didn&rsquo;t the testes go red you ask? Let&rsquo;s look at the asserts in the test:</p>
+<pre tabindex=0><code>var result = browser.Get(&quot;/api/chocoPackages&quot;, with =&gt;
+			{
+				with.HttpRequest();			
+			});
+
+			var resultJson = result.Body.AsString().ToLower();
+
+			Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+			Assert.True(resultJson.Contains(&quot;major&quot;));
+Assert.True(resultJson.Contains(&quot;minor&quot;));
+</code></pre><p><code>ToLower()</code>. Yeah. The consumer of the API did <em>not</em> use <code>ToLower()</code>, obviously.</p>
+<p>So what can we learn from this story?</p>
+<ul>
+<li>Don&rsquo;t take on dependencies for a single and simple usecase</li>
+</ul>
+<p>I referenced <code>Nuget.Core</code> as a NuGet package to grab hold of the <code>SemanticVersion</code> class for parsing semantic version strings to a <code>Version</code> object. That usecase is so slim that just duplicating <code>SemanticVersion</code> from GitHub to my project is a much better approach - it is just stupid to take on a NuGet dependency.</p>
+<ul>
+<li>Allways unit test as far out as possible</li>
+</ul>
+<p>By having unit tests that call the actual API and assert on the expected response, the chances of breaking the API minimizes substantially. With Nancy <a href=https://github.com/NancyFx/Nancy/wiki/Testing-your-application>this is no problem</a>. Also, <em>test the types</em>. A simple <code>Contains()</code> on the JSON response is not enough. Always deserialize the object if possible.</p>
+<ul>
+<li>You don&rsquo;t know what consumers have done with your API</li>
+</ul>
+<p>The last and most important lesson is that if you have published your API and you have users on it, you have no idea how the client consume it. Even the smallest changes (like going from lowercase to uppsercase keys in this example) can break the consumer. That is the last thing we want. If you have put the API out there, you should respect the consumer and allways think about what effect your changes can have on them.</p>
+</section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/associate-file-endings-with-languages-in-atom/><span>←</span><span>Associate file endings with languages in Atom</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/my-favorite-podcasts-2017-edition-2/><span>My Favorite Podcasts - 2017 edition</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>

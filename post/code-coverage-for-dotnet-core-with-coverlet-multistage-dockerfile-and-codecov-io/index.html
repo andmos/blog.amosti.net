@@ -1,0 +1,113 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io - Dev&Ops</title>
+<meta name=description content="Enter Coverlet The one thing I missed when moving away from full-framework and Visual Studio to VSCode and dotnet core, was simple code coverage.
+Given the easy tooling dotnet provides, with dotnet build, dotnet test and dotnet publish, I looked for something that integrated nicely with these commands without adding to much complexity to the code project itself. After som googling, I stumbled over Scott Hanselman&rsquo;s blogpost about a cool little project called Coverlet.">
+<meta name=author content="Andreas Mosti">
+<link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/twitter.svg>
+<link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
+<link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
+<link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
+<meta name=generator content="Hugo 0.92.1">
+<meta property="og:title" content="Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io">
+<meta property="og:description" content="Enter Coverlet The one thing I missed when moving away from full-framework and Visual Studio to VSCode and dotnet core, was simple code coverage.
+Given the easy tooling dotnet provides, with dotnet build, dotnet test and dotnet publish, I looked for something that integrated nicely with these commands without adding to much complexity to the code project itself. After som googling, I stumbled over Scott Hanselman&rsquo;s blogpost about a cool little project called Coverlet.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://andmos.github.io/blog.amosti.net/post/code-coverage-for-dotnet-core-with-coverlet-multistage-dockerfile-and-codecov-io/"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2019-05-26T11:38:51+00:00">
+<meta property="article:modified_time" content="2019-05-26T11:38:51+00:00">
+<meta itemprop=name content="Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io">
+<meta itemprop=description content="Enter Coverlet The one thing I missed when moving away from full-framework and Visual Studio to VSCode and dotnet core, was simple code coverage.
+Given the easy tooling dotnet provides, with dotnet build, dotnet test and dotnet publish, I looked for something that integrated nicely with these commands without adding to much complexity to the code project itself. After som googling, I stumbled over Scott Hanselman&rsquo;s blogpost about a cool little project called Coverlet."><meta itemprop=datePublished content="2019-05-26T11:38:51+00:00">
+<meta itemprop=dateModified content="2019-05-26T11:38:51+00:00">
+<meta itemprop=wordCount content="660">
+<meta itemprop=keywords content>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io">
+<meta name=twitter:description content="Enter Coverlet The one thing I missed when moving away from full-framework and Visual Studio to VSCode and dotnet core, was simple code coverage.
+Given the easy tooling dotnet provides, with dotnet build, dotnet test and dotnet publish, I looked for something that integrated nicely with these commands without adding to much complexity to the code project itself. After som googling, I stumbled over Scott Hanselman&rsquo;s blogpost about a cool little project called Coverlet.">
+</head>
+<body class=not-ready data-menu=true>
+<header class=header>
+<p class=logo>
+<a class=site-name href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a><a class=btn-dark></a>
+</p>
+<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+<nav class=menu>
+<a href=/blog.amosti.net/about/>About Andreas</a>
+</nav>
+<nav class=social>
+<a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
+<a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-title>
+<p>
+<time>May 26, 2019</time>
+<span>Andreas Mosti</span>
+</p>
+<h1>Code Coverage for dotnet core with Coverlet, multi-stage Dockerfile and codecov.io</h1>
+</header>
+<section class=post-content><h2 id=enter-coverlet>Enter Coverlet</h2>
+<p>The one thing I missed when moving away from full-framework and Visual Studio to VSCode and dotnet core, was simple code coverage.</p>
+<p>Given the easy tooling <code>dotnet</code> provides, with <code>dotnet build</code>, <code>dotnet test</code> and <code>dotnet publish</code>, I looked for something that integrated nicely with these commands without adding to much complexity to the code project itself. After som googling, I stumbled over Scott Hanselman&rsquo;s <a href=https://www.hanselman.com/blog/NETCoreCodeCoverageAsAGlobalToolWithCoverlet.aspx>blogpost</a> about a cool little project called <a href=https://github.com/tonerdo/coverlet>Coverlet</a>. Coverlet was just what I was looking for:</p>
+<blockquote>
+<p>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</p>
+</blockquote>
+<p><code>coverlet</code> can be installed as a <code>dotnet tool</code> with</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>dotnet tool install --global coverlet.console
+</code></pre></div><p>to make it globally available, providing it&rsquo;s own <a href=https://github.com/tonerdo/coverlet#code-coverage>CLI tool running directly at the test assemblies</a>.</p>
+<p>The strategy I have settled on is using the <code>coverlet.msbuild</code> package that can be added to your test projects with</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>dotnet add package coverlet.msbuild
+</code></pre></div><p>When using the <code>coverlet.msbuild</code> package, no extra setup is needed, and <code>coverlet</code> integrates directly with <code>dotnet test</code> with some extra parameters,</p>
+<pre tabindex=0><code>dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:CoverletOutputFormat=opencover
+</code></pre><p>The clue here is <code>/p:CollectCoverage=true</code>, the parameter that enables collection of code coverage. if no other option is specified, the coverage will be reported to the console when the tests are finished running:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>+-----------------+--------+--------+--------+
+| Module          | Line   | Branch | Method |
++-----------------+--------+--------+--------+
+| BikeshareClient | 93.2%  | 94.6%  | 85.7%  |
++-----------------+--------+--------+--------+
+</code></pre></div><p>Now the other parameters specified in the example is <code>/p:Threshold=80</code> and <code>/p:ThresholdType=line</code>. So if the code coverage drops below 80%, the build breaks here, while <code>/p:CoverletOutputFormat=opencover</code> writes a report in the <a href=https://github.com/opencover/opencover/wiki/Reports>opencover</a> format.</p>
+<h2 id=multi-stage-dockerfile>Multi-stage Dockerfile</h2>
+<p>For most new projects, I have found myself using a simple <code>Dockerfile</code> along with some CI/CD tool like <a href=https://travis-ci.org/>Travis</a>, <a href=https://www.appveyor.com/>AppVeyor</a> or <a href=https://azure.microsoft.com/nb-no/services/devops/pipelines/>Azure Pipelines</a>. This approach helps keeping the builds simple, as large <code>Dockerfiles</code> are harder to work with. The sole purpose of <code>Docker</code> is to keep things reproducible no mather the environment it builds and runs images in, so migrating from one CI provider to another is hardly any work. Building locally will always match the result on the CI system.</p>
+<p>But, let&rsquo;s say build using <a href=https://docs.docker.com/develop/develop-images/multistage-build/>multi-stage Dockerfiles</a>. In a multi-stage build, we separate the SDK, build and test tools in one image, while copying the resulting artifacts to another image, more suitable for production runtimes. The rule is, have a small production image containing just what is needed for running your artifacts. Just one problem: How do we take care of that <code>coverage.opencover.xml</code> file? We don&rsquo;t what to transfer that file to the production image to grab hold of it, code coverage results don&rsquo;t belong in a production image.</p>
+<p>Thankfully, <code>Docker</code> stores <em>layers</em> that can be brought up after building the image.
+Here is our example multi-stage <code>Dockerfile</code>:</p>
+<script src=https://gist.github.com/andmos/1ccfb13473a896f598cd51cccbe3fa4c.js></script>
+<p>In short, we build, test and publish the app with the <code>microsoft/dotnet:2.2-sdk</code> base image, before copying over the binaries to the <code>microsoft/dotnet:2.2-aspnetcore-runtime</code> image.</p>
+<p>To use <code>coverlet</code> and extract code coverage, this line does the trick:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>RUN dotnet test /p:CollectCoverage<span style=color:#f92672>=</span>true /p:Include<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;[BikeDashboard*]*&#34;</span> /p:CoverletOutputFormat<span style=color:#f92672>=</span>opencover
+</code></pre></div><p>Notice the <code>label</code> on line 3:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>LABEL test<span style=color:#f92672>=</span>true
+</code></pre></div><p>With the label, it is possible to look up the id of the <code>docker build</code> <em>layer</em> containing the code coverage file, create a container from that <em>image layer</em> and use <code>docker copy</code> to grab hold of the coverage XML. Take a look:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>export id<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>docker images --filter <span style=color:#e6db74>&#34;label=test=true&#34;</span> -q | head -1<span style=color:#66d9ef>)</span>
+docker create --name testcontainer $id
+docker cp testcontainer:/app/TestBikedashboard/coverage.opencover.xml .
+</code></pre></div><h2 id=wrapping-it-up-with-travis-and-codecovio>Wrapping it up with Travis and codecov.io</h2>
+<p>So now we have a simple build chain with a multi-stage <code>Dockerfile</code> and code coverage generation. As a last feature, the coverage report can be used by code coverage analyzers like <a href=https://codecov.io/>codecov.io</a>. codecov.io <a href=https://github.com/apps/codecov>integrates with Github</a>, and can automatically analyze incoming pull-request and break a build if coverage drops by merging the PR. Quite nifty.</p>
+<p>Integrating codecov.io with CI systems like Travis is done with a one-liner, thanks to the provided <a href=https://docs.codecov.io/docs/about-the-codecov-bash-uploader>upload-script</a>. When using Travis, not even a token is required.</p>
+<p><code>.travis</code> example file:</p>
+<script src=https://gist.github.com/andmos/65143919934e8f5deeb02c6705f9e780.js></script>
+</section>
+<nav class=post-nav>
+<a class=prev href=https://andmos.github.io/blog.amosti.net/post/running-gbfs-bikeshare-functions-with-openfaas-for-fun-and-profit/><span>←</span><span>Running GBFS bikeshare functions with OpenFaaS for fun and profit</span></a>
+<a class=next href=https://andmos.github.io/blog.amosti.net/post/ensure-consistent-markdown-style-with-markdownlint/><span>Ensure consistent Markdown style with Markdownlint</span><span>→</span></a>
+</nav>
+</article>
+</main>
+<footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net/>Dev&Ops</a></p>
+<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
+<p>
+<a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
+</p>
+</footer>
+</body>
+</html>
