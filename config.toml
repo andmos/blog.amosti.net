@@ -1,4 +1,4 @@
-baseURL = "https://blog.amosti.net"
+baseURL = "https://andmos.github.io/blog.amosti.net/"
 disablePathToLower = true
 languageCode = "en-us"
 title = "Dev&Ops"
