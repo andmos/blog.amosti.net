@@ -6,7 +6,7 @@ Build:
 ```sh
 docker run --rm -it \
   -v $(pwd):/src \
-  klakegg/hugo:0.92.1
+  klakegg/hugo:latest
 ```
 
 Run server:
@@ -15,7 +15,7 @@ Run server:
 docker run --rm -it \
   -v $(pwd):/src \
   -p 1313:1313 \
-  klakegg/hugo:0.92.1 \
+  klakegg/hugo:latest \
   server
 ```
 
