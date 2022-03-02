@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Docker Garbage Collection - Dev&Ops</title>
-<meta name=description content="A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each ADD or RUN block. The containers then tend to multiply as frequently as rabbits.
+<title>Docker Garbage Collection - Dev&Ops</title><meta name=description content="A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each ADD or RUN block. The containers then tend to multiply as frequently as rabbits.
 To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, the good guys over at Spotify has created the docker-gc project on GitHub.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
@@ -13,7 +12,7 @@ To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, t
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Docker Garbage Collection">
 <meta property="og:description" content="A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each ADD or RUN block. The containers then tend to multiply as frequently as rabbits.
 To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, the good guys over at Spotify has created the docker-gc project on GitHub.">
@@ -31,35 +30,23 @@ To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, t
 <meta name=twitter:title content="Docker Garbage Collection">
 <meta name=twitter:description content="A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each ADD or RUN block. The containers then tend to multiply as frequently as rabbits.
 To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, the good guys over at Spotify has created the docker-gc project on GitHub.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Aug 3, 2015</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Docker Garbage Collection</h1>
-</header>
-<section class=post-content><p>A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each <code>ADD</code> or <code>RUN</code> block. The containers then tend to multiply as frequently as rabbits.</p>
-<p>To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, the good guys over at <a href=https://spotify.com>Spotify</a> has created the <a href=https://github.com/spotify/docker-gc>docker-gc</a> project on GitHub. This project contains a script that removes ALL containers that has been exited over an hour ago, together with their respective images. One hour might sound extreme, but if you think about it, containers that have exited and is not running are mostly (or at least should be!) throw-away containers we have no need for anymore.</p>
-<h3 id=install-and-run>Install and run</h3>
-<p>The script can be run standalone or create a deb-package:</p>
-<pre><code>$ apt-get install git devscripts debhelper
+</p><h1>Docker Garbage Collection</h1></header><section class=post-content><p>A mayor issue you might have run into when working on Docker-images is actual disk space. Over time, images and containers can consume a great deal of your precious drive, often when you are developing the actual image and having a test-run after each <code>ADD</code> or <code>RUN</code> block. The containers then tend to multiply as frequently as rabbits.</p><p>To solve this problem and the lack of Docker &ldquo;garbage collection&rdquo;, the good guys over at <a href=https://spotify.com>Spotify</a> has created the <a href=https://github.com/spotify/docker-gc>docker-gc</a> project on GitHub. This project contains a script that removes ALL containers that has been exited over an hour ago, together with their respective images. One hour might sound extreme, but if you think about it, containers that have exited and is not running are mostly (or at least should be!) throw-away containers we have no need for anymore.</p><h3 id=install-and-run>Install and run</h3><p>The script can be run standalone or create a deb-package:</p><pre><code>$ apt-get install git devscripts debhelper
 $ git clone https://github.com/spotify/docker-gc.git
 $ cd docker-gc
 $ debuild -us -uc -b
@@ -68,42 +55,20 @@ $ debuild -us -uc -b
 $ dpkg -i ../docker-gc_0.0.3_all.deb
 
 $ sudo docker-gc
-</code></pre>
-<p>The script is of course best used as a cron.hourly job.</p>
-<p>If you like to run everything in Docker (and hey, why wouldn&rsquo;t you) they have also made a Dockerfile for you:</p>
-<pre><code>docker build -t spotify/docker-gc .
+</code></pre><p>The script is of course best used as a cron.hourly job.</p><p>If you like to run everything in Docker (and hey, why wouldn&rsquo;t you) they have also made a Dockerfile for you:</p><pre><code>docker build -t spotify/docker-gc .
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock spotify/docker-gc
-</code></pre>
-<h3 id=exclude-images>Exclude images</h3>
-<p>Some images are nice to actually keep on the host (maby for dev or on a production server?)
-It would have been a real bummer if there were no support for exclusion of images from garbage collection, but thankfully there is:</p>
-<pre><code>touch /etc/docker-gc-exclude
+</code></pre><h3 id=exclude-images>Exclude images</h3><p>Some images are nice to actually keep on the host (maby for dev or on a production server?)
+It would have been a real bummer if there were no support for exclusion of images from garbage collection, but thankfully there is:</p><pre><code>touch /etc/docker-gc-exclude
 echo &quot;spotify/cassandra:latest&quot; &gt;&gt; /etc/docker-gc-exclude
-</code></pre>
-<h3 id=notes>Notes</h3>
-<p>If you are running a docker version above 1.6 and experience an error with the date format like so:</p>
-<pre><code>  $ sudo docker-gc
+</code></pre><h3 id=notes>Notes</h3><p>If you are running a docker version above 1.6 and experience an error with the date format like so:</p><pre><code>  $ sudo docker-gc
   date: invalid date ‘&quot;2015-07-25 09:26:5’
-</code></pre>
-<p>Replace the related lines in the data_parse function with these lines:</p>
-<pre><code>replace_t=&quot;${without_ms/T/ }&quot;
+</code></pre><p>Replace the related lines in the data_parse function with these lines:</p><pre><code>replace_t=&quot;${without_ms/T/ }&quot;
 replace_quote=&quot;${replace_t#\&quot;}&quot;
 epoch=$(date_parse &quot;${replace_quote}&quot;)
-</code></pre>
-<p>As of 03.08.2015 this fix has not been merged to master but I guess that will happen at some point soon.</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>As of 03.08.2015 this fix has not been merged to master but I guess that will happen at some point soon.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/managing-nuget-dependencies-with-paket/><span>←</span><span>Managing NuGet dependencies with Paket</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/on-development-managers/><span>On Development Managers</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

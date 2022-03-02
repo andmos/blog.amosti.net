@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Run Github's Atom editor in Docker (Aka. Containers on the desktop) - Dev&Ops</title>
-<meta name=description content="By now everybody loves Docker. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of dependency hell while keeping them isolated from each other. Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.">
+<title>Run Github's Atom editor in Docker (Aka. Containers on the desktop) - Dev&Ops</title><meta name=description content="By now everybody loves Docker. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of dependency hell while keeping them isolated from each other. Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
@@ -12,7 +11,7 @@
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Run Github's Atom editor in Docker (Aka. Containers on the desktop)">
 <meta property="og:description" content="By now everybody loves Docker. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of dependency hell while keeping them isolated from each other. Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.">
 <meta property="og:type" content="article">
@@ -27,38 +26,26 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Run Github's Atom editor in Docker (Aka. Containers on the desktop)">
 <meta name=twitter:description content="By now everybody loves Docker. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of dependency hell while keeping them isolated from each other. Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>May 23, 2015</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Run Github's Atom editor in Docker (Aka. Containers on the desktop)</h1>
-</header>
-<section class=post-content><p>By now everybody loves <a href=https://www.docker.com/>Docker</a>. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of <a href="https://www.youtube.com/watch?v=3N3n9FzebAA">dependency hell</a> while keeping them isolated from each other.
-Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.</p>
-<p>A couple of months ago I read a <a href=https://blog.jessfraz.com/post/docker-containers-on-the-desktop/>blogpost</a> by the talented Docker engineer <a href=https://github.com/jfrazelle>Jessie Frazelle</a> who has made a large collection of Docker images for the <a href=https://github.com/jfrazelle/dockerfiles>desktop</a>.
-The FREAKING desktop. To <a href=https://twitter.com/frazelledazzell/status/596345044912635904>quote</a> Jessie:</p>
-<blockquote class=twitter-tweet lang=no><p lang=en dir=ltr>The worst thing someone could do if I ever left my computer unlocked (which will never happen) is install something directly on my host</p>&mdash; jessie frazelle (@frazelledazzell) <a href=https://twitter.com/frazelledazzell/status/596345044912635904>7. mai 2015</a></blockquote> <script async src=//platform.twitter.com/widgets.js></script>
-<p>Feeling inspired by this crazy lady I decided to try it out myself. So here is a Dockerfile for the <a href=https://atom.io/>Atom</a> editor you can run on you&rsquo;re Linux desktop (because, why the hell not?)</p>
-<h3 id=dockerfile>Dockerfile</h3>
-<pre><code># Based on work by Jessie Frazelle, https://github.com/jfrazelle/dockerfiles/blob/master/atom/Dockerfile
+</p><h1>Run Github's Atom editor in Docker (Aka. Containers on the desktop)</h1></header><section class=post-content><p>By now everybody loves <a href=https://www.docker.com/>Docker</a>. I mean, what is there not to love? Never have it been easier to program, pack and deploy you&rsquo;re applications and getting out of <a href="https://www.youtube.com/watch?v=3N3n9FzebAA">dependency hell</a> while keeping them isolated from each other.
+Docker has solved the whole &ldquo;download and install this on the server, but remember to have the right version of Java (no, not that one!) and Tomcat (7, not 8)&rdquo; - problem. All servers are happy.</p><p>A couple of months ago I read a <a href=https://blog.jessfraz.com/post/docker-containers-on-the-desktop/>blogpost</a> by the talented Docker engineer <a href=https://github.com/jfrazelle>Jessie Frazelle</a> who has made a large collection of Docker images for the <a href=https://github.com/jfrazelle/dockerfiles>desktop</a>.
+The FREAKING desktop. To <a href=https://twitter.com/frazelledazzell/status/596345044912635904>quote</a> Jessie:</p><blockquote class=twitter-tweet lang=no><p lang=en dir=ltr>The worst thing someone could do if I ever left my computer unlocked (which will never happen) is install something directly on my host</p>&mdash; jessie frazelle (@frazelledazzell) <a href=https://twitter.com/frazelledazzell/status/596345044912635904>7. mai 2015</a></blockquote><script async src=//platform.twitter.com/widgets.js></script>
+<p>Feeling inspired by this crazy lady I decided to try it out myself. So here is a Dockerfile for the <a href=https://atom.io/>Atom</a> editor you can run on you&rsquo;re Linux desktop (because, why the hell not?)</p><h3 id=dockerfile>Dockerfile</h3><pre><code># Based on work by Jessie Frazelle, https://github.com/jfrazelle/dockerfiles/blob/master/atom/Dockerfile
 FROM ubuntu:14.04
 MAINTAINER Andreas Mosti &lt;andreas.mosti@gmail.com&gt;
 
@@ -101,32 +88,16 @@ git clone https://github.com/andmos/dotfiles.git &amp;&amp; \
 cd dotfiles/atom; ./configureAtom
 
 CMD /usr/local/bin/atom --foreground --log-file /var/log/atom.log &amp;&amp; tail -f /var/log/atom.log
-</code></pre>
-<h3 id=build-and-run>Build and run</h3>
-<pre><code>wget https://raw.githubusercontent.com/andmos/Docker-Atom/master/Dockerfile
+</code></pre><h3 id=build-and-run>Build and run</h3><pre><code>wget https://raw.githubusercontent.com/andmos/Docker-Atom/master/Dockerfile
 docker build -t atom
 docker run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY atom
-</code></pre>
-<p>Another cool thing we can do is to attach a <a href=https://docs.docker.com/userguide/dockervolumes/>data container</a> with the
-<code>--volumes-from=</code> flag. Here is how to build a data container from a git-repo and attach:</p>
-<pre><code>docker run --name coffee -e repo=https://github.com/andmos/coffee.git -t andmos/git
+</code></pre><p>Another cool thing we can do is to attach a <a href=https://docs.docker.com/userguide/dockervolumes/>data container</a> with the
+<code>--volumes-from=</code> flag. Here is how to build a data container from a git-repo and attach:</p><pre><code>docker run --name coffee -e repo=https://github.com/andmos/coffee.git -t andmos/git
 docker run --volumes-from:coffee -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY atom
-</code></pre>
-<p>open <code>/var/workspace/coffee</code> and there is the repo!</p>
-<p>This image has lots of possibilities - happy hacking!</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>open <code>/var/workspace/coffee</code> and there is the repo!</p><p>This image has lots of possibilities - happy hacking!</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/on-development-managers/><span>←</span><span>On Development Managers</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/easy-way-to-upgrade-docker/><span>Easy way to upgrade Docker</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Build and publish AsciiDoc with Docker and nginx - Dev&Ops</title>
-<meta name=description content="One of the teams at work is piloting the usage of AsciiDoc for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s Markdown, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, Docker with public images directly from the Docker Hub.">
+<title>Build and publish AsciiDoc with Docker and nginx - Dev&Ops</title><meta name=description content="One of the teams at work is piloting the usage of AsciiDoc for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s Markdown, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, Docker with public images directly from the Docker Hub.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
@@ -12,7 +11,7 @@
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Build and publish AsciiDoc with Docker and nginx">
 <meta property="og:description" content="One of the teams at work is piloting the usage of AsciiDoc for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s Markdown, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, Docker with public images directly from the Docker Hub.">
 <meta property="og:type" content="article">
@@ -27,53 +26,32 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Build and publish AsciiDoc with Docker and nginx">
 <meta name=twitter:description content="One of the teams at work is piloting the usage of AsciiDoc for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s Markdown, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, Docker with public images directly from the Docker Hub.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Sep 3, 2015</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Build and publish AsciiDoc with Docker and nginx</h1>
-</header>
-<section class=post-content><p>One of the teams at work is piloting the usage of <a href=http://www.methods.co.nz/asciidoc/>AsciiDoc</a> for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s <a href=http://daringfireball.net/projects/markdown/>Markdown</a>, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, <a href=https://www.docker.com/>Docker</a> with public images directly from the <a href=https://hub.docker.com/>Docker Hub</a>.</p>
-<p>These steps gets triggered on each build:</p>
-<pre><code>if [[ -z &quot;$(sudo docker ps | grep webserver)&quot; ]]; then
+</p><h1>Build and publish AsciiDoc with Docker and nginx</h1></header><section class=post-content><p>One of the teams at work is piloting the usage of <a href=http://www.methods.co.nz/asciidoc/>AsciiDoc</a> for documentation of their product. AsciiDoc is a markup-format just like Gruber&rsquo;s <a href=http://daringfireball.net/projects/markdown/>Markdown</a>, but is more advanced and offers more possibilities. Since the documentation is located alongside the source code in Git (as it should be!) I created a simple build step for easy build and deploy of the documentation with my favorite tool, <a href=https://www.docker.com/>Docker</a> with public images directly from the <a href=https://hub.docker.com/>Docker Hub</a>.</p><p>These steps gets triggered on each build:</p><pre><code>if [[ -z &quot;$(sudo docker ps | grep webserver)&quot; ]]; then
     sudo docker run -dt --name webserver -p 80:80 -v /usr/share/nginx/html nginx
 fi
 
 sudo docker run -it -v /var/buildDropLocation/build/docs:/documents/ --volumes-from webserver asciidoctor/docker-asciidoctor asciidoctor -a stylesheet=dips.css -a toc-left technical_document.adoc -D /usr/share/nginx/html
-</code></pre>
-<p>In short, we check if the <a href=http://nginx.org/>nginx</a>-container is running and starts it if needed. The HTML-folder is exposed.
-Next we pull down and run the <a href=https://github.com/asciidoctor/docker-asciidoctor>asciidoctor-image</a> from the Docker Hub and link in the docs-folder from the build. We use <a href=https://www.jetbrains.com/teamcity/>TeamCity</a>, so customize these variables to fit your build system. asciidoctor then runs on the files and puts the output HTML in the volume from the nginx-container. Easy as that, live documentation directly from the latest build.</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>In short, we check if the <a href=http://nginx.org/>nginx</a>-container is running and starts it if needed. The HTML-folder is exposed.
+Next we pull down and run the <a href=https://github.com/asciidoctor/docker-asciidoctor>asciidoctor-image</a> from the Docker Hub and link in the docs-folder from the build. We use <a href=https://www.jetbrains.com/teamcity/>TeamCity</a>, so customize these variables to fit your build system. asciidoctor then runs on the files and puts the output HTML in the volume from the nginx-container. Easy as that, live documentation directly from the latest build.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/fun-with-travis-ci/><span>←</span><span>Fun with Travis CI</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/managing-nuget-dependencies-with-paket/><span>Managing NuGet dependencies with Paket</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

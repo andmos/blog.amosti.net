@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Rolling out web services with Topshelf, Chocolatey and Ansible - Dev&Ops</title>
-<meta name=description content="I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. Ansible is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it.">
+<title>Rolling out web services with Topshelf, Chocolatey and Ansible - Dev&Ops</title><meta name=description content="I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. Ansible is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
@@ -12,7 +11,7 @@
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Rolling out web services with Topshelf, Chocolatey and Ansible">
 <meta property="og:description" content="I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. Ansible is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it.">
 <meta property="og:type" content="article">
@@ -27,178 +26,152 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Rolling out web services with Topshelf, Chocolatey and Ansible">
 <meta name=twitter:description content="I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. Ansible is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Nov 20, 2016</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Rolling out web services with Topshelf, Chocolatey and Ansible</h1>
-</header>
-<section class=post-content><p>I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. <a href=https://www.ansible.com/>Ansible</a> is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it. The next tool that has changed the game is <a href=https://chocolatey.org/>Chocolatey</a>. One of the traditional advantages Linux has had over the Windows platform has been package managers - or a standardized interface for finding and installing software. Chocolatey is is an ambitious attempt at the same thing for Windows. Scott Hanselman <a href=http://www.hanselman.com/blog/IsTheWindowsUserReadyForAptget.aspx>wrote about it </a> back in 2013, and since then the project has catched on and kept growing. At DIPS we <a href=http://tech.dips.no/2016/08/17/Deployment-av-servere.html>package our software with Chocolatey</a>, giving us more scriptable flexibility over the old MSI regime. Chocolatey shines on it&rsquo;s own, but combined with Ansible it is <em>pure</em> magic. Ansible provides a <a href=https://docs.ansible.com/ansible/win_chocolatey_module.html>Chocolatey module</a> that let&rsquo;s us install Chocolatey packages as a part of the provisioning. Take the following examples from our Playbooks:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python> <span style=color:#f92672>-</span> name: Install DotNet Framework <span style=color:#ae81ff>4.6.1</span>
-   win_chocolatey: name<span style=color:#f92672>=</span>dotnet4<span style=color:#ae81ff>.6.1</span>
-</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>-</span> name: Install Octopus Tentacle Files
-  win_chocolatey: name<span style=color:#f92672>=</span>octopusdeploy<span style=color:#f92672>.</span>tentacle
-</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>-</span> name: Install Java JDK <span style=color:#ae81ff>8</span>
-  win_chocolatey: name<span style=color:#f92672>=</span>jdk8
-</code></pre></div><p>You catch the point. Almost looks like <code>apt-get</code> right there.</p>
-<p>Next up I like to show how a HTTP service can be rolled out with Ansible and Chocolatey. Since we roll out our own software as Chocolatey packages in a Continuous Delivery pipeline, the need to monitor exactly which packages are deployed to a given server at <em>this time</em> came up. To deal with it I wrote <a href=https://github.com/andmos/Stratos>Stratos</a>, a simple HTTP API to report what Chocolatey packages are installed on the server. A <code>GET</code> on <code>/api/chocoPackages</code> will returns some JSON:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>[
-  {
-    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;chocolatey&#34;</span>,
-    <span style=color:#f92672>&#34;version&#34;</span>: {
-      <span style=color:#f92672>&#34;version&#34;</span>: {
-        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>0</span>,
-        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>10</span>,
-        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>3</span>,
-        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>0</span>,
-        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>0</span>,
-        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>0</span>
-      },
-      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
-    }
-  },
-  {
-    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;DotNet4.5.2&#34;</span>,
-    <span style=color:#f92672>&#34;version&#34;</span>: {
-      <span style=color:#f92672>&#34;version&#34;</span>: {
-        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>4</span>,
-        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>5</span>,
-        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>2</span>,
-        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>20140902</span>,
-        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>307</span>,
-        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>21350</span>
-      },
-      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
-    }
-  },
-  {
-    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;DotNet4.6.1&#34;</span>,
-    <span style=color:#f92672>&#34;version&#34;</span>: {
-      <span style=color:#f92672>&#34;version&#34;</span>: {
-        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>4</span>,
-        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>6</span>,
-        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>1055</span>,
-        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>1</span>,
-        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>0</span>,
-        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>1</span>
-      },
-      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
-    }
-  }
-]
-</code></pre></div><p>Simple, but enough to provide data for a simple dashboard.</p>
-<p>Stratos is written with <a href=http://nancyfx.org/>Nancy</a> and <a href=http://topshelf-project.com/>Topshelf</a>. Topshelf is great because it allows you to install Console applications as Windows Services. Together with Nancy&rsquo;s self-hostable package this means that the HTTP service can be deployed without IIS, which is a good thing for simple applications like this one. The main method for Stratos looks like this:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c# data-lang=c#><span style=color:#66d9ef>using</span> Topshelf.Nancy;
-<span style=color:#66d9ef>using</span> Topshelf;
-
-<span style=color:#66d9ef>namespace</span> Stratos
-{
-	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Program</span>
-	{
-		<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> Main(<span style=color:#66d9ef>string</span>[] args)
-		{
-			<span style=color:#66d9ef>var</span> host = HostFactory.New(x =&gt;
-			{
-				x.UseLinuxIfAvailable();
-				x.Service&lt;StratosSelfHost&gt;(s =&gt;
-				{
-					s.ConstructUsing(settings =&gt; <span style=color:#66d9ef>new</span> StratosSelfHost());
-					s.WhenStarted(service =&gt; service.Start());
-					s.WhenStopped(service =&gt; service.Stop());
-					s.WithNancyEndpoint(x, c =&gt;
-					{
-						c.AddHost(port: <span style=color:#ae81ff>1337</span>);
-						c.CreateUrlReservationsOnInstall();
-						c.OpenFirewallPortsOnInstall(firewallRuleName: <span style=color:#e6db74>&#34;StratosService&#34;</span>);
-					});
-				});
-
-				x.StartAutomatically();
-				x.SetServiceName(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
-				x.SetDisplayName(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
-				x.SetDescription(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
-				x.RunAsNetworkService();
-
-			});
-			host.Run();
-		}
-	}
-}
-</code></pre></div><p>All the configuration in one method. Sweet.</p>
-<p>The application is packaged up as a Chocolatey package, AKA NuGet with a <code>ChocolateyInstall.ps1</code> script for the installation of the service:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell>Write-Host <span style=color:#e6db74>&#34;Installing Stratos as as windows service...&#34;</span>
-
-<span style=color:#66d9ef>try</span> {
-
-    $service_name = <span style=color:#e6db74>&#34;StratosService&#34;</span>
-    $process_name = <span style=color:#e6db74>&#34;StratosService&#34;</span>
-    $serviceFileName = <span style=color:#e6db74>&#34;Stratos.exe&#34;</span>
-
-    $PSScriptRoot = Split-Path -parent $MyInvocation.MyCommand.Definition
-    $packageDir = $PSScriptRoot | Split-Path;
-    $srcDir = <span style=color:#e6db74>&#34;</span>$($PSScriptRoot)<span style=color:#e6db74>\..\bin&#34;</span>
-    $destDir = <span style=color:#e6db74>&#34;$srcDir&#34;</span>
-
-    $service = Get-Service | Where-Object {$_.Name <span style=color:#f92672>-eq</span> $service_name}
-
-    <span style=color:#66d9ef>if</span>($service){
-        Stop-Service $service_name
-        $service.WaitForStatus(<span style=color:#e6db74>&#34;Stopped&#34;</span>)
-        kill -processname $process_name -force -ErrorAction SilentlyContinue
-        Wait-Process -Name $process_name -ErrorAction SilentlyContinue
-        Write-Host <span style=color:#e6db74>&#34;Uninstalling $service_name...&#34;</span>
-
-        $fileToUninstall = Join-Path <span style=color:#e6db74>&#34;$srcDir\&#34;</span> $serviceFileName
-        . $fileToUninstall uninstall
-    }
-
-    $fileToInstall = Join-Path <span style=color:#e6db74>&#34;$destDir\&#34;</span> $serviceFileName
-    . $fileToInstall install
-}
-<span style=color:#66d9ef>catch</span> {
-    <span style=color:#66d9ef>throw</span> $_.Exception
-}
-<span style=color:#66d9ef>try</span>{
-    . $fileToInstall start
-}
-<span style=color:#66d9ef>catch</span>{
-    Write-Host <span style=color:#e6db74>&#34;$process_name was successfully installed, but could not be started. This is most likely because of a configuration error. Please check the Windows Event Log.&#34;</span>
-}
-</code></pre></div><p>The next part is to deploy the service. That is the easy part thanks to Ansible:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell>- name<span style=color:#960050;background-color:#1e0010>:</span> Install Stratos Chocolatey service
-  win_chocolatey<span style=color:#960050;background-color:#1e0010>:</span> name=stratos source=http<span style=color:#960050;background-color:#1e0010>:</span>//dips-nuget/nuget/InternalSoftware state=present upgrade=True
-</code></pre></div><p>The <code>upgrade=True</code> flag will make sure that any new versions of the service get&rsquo;s rolled out.</p>
-</section>
-<nav class=post-nav>
+</p><h1>Rolling out web services with Topshelf, Chocolatey and Ansible</h1></header><section class=post-content><p>I have been doing a lot of automation on the Windows platform at work lately. That sentence would have been associated with pain some years ago - but things have changed. <a href=https://www.ansible.com/>Ansible</a> is nothing less than the perfect provisioning tool for both Linux and Windows, providing (in my opinion) the best level of abstraction when managing systems and state. A lot of modules are there also for Windows, so you have to put minimal of effort in the details of the provisioning steps, making it easy for people who are not developers or scripting guys to catch the gist of it. The next tool that has changed the game is <a href=https://chocolatey.org/>Chocolatey</a>. One of the traditional advantages Linux has had over the Windows platform has been package managers - or a standardized interface for finding and installing software. Chocolatey is is an ambitious attempt at the same thing for Windows. Scott Hanselman <a href=http://www.hanselman.com/blog/IsTheWindowsUserReadyForAptget.aspx>wrote about it </a> back in 2013, and since then the project has catched on and kept growing. At DIPS we <a href=http://tech.dips.no/2016/08/17/Deployment-av-servere.html>package our software with Chocolatey</a>, giving us more scriptable flexibility over the old MSI regime. Chocolatey shines on it&rsquo;s own, but combined with Ansible it is <em>pure</em> magic. Ansible provides a <a href=https://docs.ansible.com/ansible/win_chocolatey_module.html>Chocolatey module</a> that let&rsquo;s us install Chocolatey packages as a part of the provisioning. Take the following examples from our Playbooks:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span> <span style=color:#f92672>-</span> name: Install DotNet Framework <span style=color:#ae81ff>4.6.1</span>
+</span></span><span style=display:flex><span>   win_chocolatey: name<span style=color:#f92672>=</span>dotnet4<span style=color:#ae81ff>.6.1</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>-</span> name: Install Octopus Tentacle Files
+</span></span><span style=display:flex><span>  win_chocolatey: name<span style=color:#f92672>=</span>octopusdeploy<span style=color:#f92672>.</span>tentacle
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>-</span> name: Install Java JDK <span style=color:#ae81ff>8</span>
+</span></span><span style=display:flex><span>  win_chocolatey: name<span style=color:#f92672>=</span>jdk8
+</span></span></code></pre></div><p>You catch the point. Almost looks like <code>apt-get</code> right there.</p><p>Next up I like to show how a HTTP service can be rolled out with Ansible and Chocolatey. Since we roll out our own software as Chocolatey packages in a Continuous Delivery pipeline, the need to monitor exactly which packages are deployed to a given server at <em>this time</em> came up. To deal with it I wrote <a href=https://github.com/andmos/Stratos>Stratos</a>, a simple HTTP API to report what Chocolatey packages are installed on the server. A <code>GET</code> on <code>/api/chocoPackages</code> will returns some JSON:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>[
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;chocolatey&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>0</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>10</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>3</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>0</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>0</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>      },
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  },
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;DotNet4.5.2&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>4</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>5</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>2</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>20140902</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>307</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>21350</span>
+</span></span><span style=display:flex><span>      },
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  },
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;packageName&#34;</span>: <span style=color:#e6db74>&#34;DotNet4.6.1&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;version&#34;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;major&#34;</span>: <span style=color:#ae81ff>4</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minor&#34;</span>: <span style=color:#ae81ff>6</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#ae81ff>1055</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;revision&#34;</span>: <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;majorRevision&#34;</span>: <span style=color:#ae81ff>0</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;minorRevision&#34;</span>: <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>      },
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;specialVersion&#34;</span>: <span style=color:#e6db74>&#34;&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>Simple, but enough to provide data for a simple dashboard.</p><p>Stratos is written with <a href=http://nancyfx.org/>Nancy</a> and <a href=http://topshelf-project.com/>Topshelf</a>. Topshelf is great because it allows you to install Console applications as Windows Services. Together with Nancy&rsquo;s self-hostable package this means that the HTTP service can be deployed without IIS, which is a good thing for simple applications like this one. The main method for Stratos looks like this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c# data-lang=c#><span style=display:flex><span><span style=color:#66d9ef>using</span> Topshelf.Nancy;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> Topshelf;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>namespace</span> Stratos
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Program</span>
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> Main(<span style=color:#66d9ef>string</span>[] args)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>var</span> host = HostFactory.New(x =&gt;
+</span></span><span style=display:flex><span>			{
+</span></span><span style=display:flex><span>				x.UseLinuxIfAvailable();
+</span></span><span style=display:flex><span>				x.Service&lt;StratosSelfHost&gt;(s =&gt;
+</span></span><span style=display:flex><span>				{
+</span></span><span style=display:flex><span>					s.ConstructUsing(settings =&gt; <span style=color:#66d9ef>new</span> StratosSelfHost());
+</span></span><span style=display:flex><span>					s.WhenStarted(service =&gt; service.Start());
+</span></span><span style=display:flex><span>					s.WhenStopped(service =&gt; service.Stop());
+</span></span><span style=display:flex><span>					s.WithNancyEndpoint(x, c =&gt;
+</span></span><span style=display:flex><span>					{
+</span></span><span style=display:flex><span>						c.AddHost(port: <span style=color:#ae81ff>1337</span>);
+</span></span><span style=display:flex><span>						c.CreateUrlReservationsOnInstall();
+</span></span><span style=display:flex><span>						c.OpenFirewallPortsOnInstall(firewallRuleName: <span style=color:#e6db74>&#34;StratosService&#34;</span>);
+</span></span><span style=display:flex><span>					});
+</span></span><span style=display:flex><span>				});
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>				x.StartAutomatically();
+</span></span><span style=display:flex><span>				x.SetServiceName(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
+</span></span><span style=display:flex><span>				x.SetDisplayName(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
+</span></span><span style=display:flex><span>				x.SetDescription(<span style=color:#e6db74>&#34;StratosService&#34;</span>);
+</span></span><span style=display:flex><span>				x.RunAsNetworkService();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>			});
+</span></span><span style=display:flex><span>			host.Run();
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>All the configuration in one method. Sweet.</p><p>The application is packaged up as a Chocolatey package, AKA NuGet with a <code>ChocolateyInstall.ps1</code> script for the installation of the service:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell><span style=display:flex><span>Write-Host <span style=color:#e6db74>&#34;Installing Stratos as as windows service...&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>try</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    $service_name = <span style=color:#e6db74>&#34;StratosService&#34;</span>
+</span></span><span style=display:flex><span>    $process_name = <span style=color:#e6db74>&#34;StratosService&#34;</span>
+</span></span><span style=display:flex><span>    $serviceFileName = <span style=color:#e6db74>&#34;Stratos.exe&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    $PSScriptRoot = Split-Path -parent $MyInvocation.MyCommand.Definition
+</span></span><span style=display:flex><span>    $packageDir = $PSScriptRoot | Split-Path;
+</span></span><span style=display:flex><span>    $srcDir = <span style=color:#e6db74>&#34;</span>$($PSScriptRoot)<span style=color:#e6db74>\..\bin&#34;</span>
+</span></span><span style=display:flex><span>    $destDir = <span style=color:#e6db74>&#34;$srcDir&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    $service = Get-Service | Where-Object {$_.Name <span style=color:#f92672>-eq</span> $service_name}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span>($service){
+</span></span><span style=display:flex><span>        Stop-Service $service_name
+</span></span><span style=display:flex><span>        $service.WaitForStatus(<span style=color:#e6db74>&#34;Stopped&#34;</span>)
+</span></span><span style=display:flex><span>        kill -processname $process_name -force -ErrorAction SilentlyContinue
+</span></span><span style=display:flex><span>        Wait-Process -Name $process_name -ErrorAction SilentlyContinue
+</span></span><span style=display:flex><span>        Write-Host <span style=color:#e6db74>&#34;Uninstalling $service_name...&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        $fileToUninstall = Join-Path <span style=color:#e6db74>&#34;$srcDir\&#34;</span> $serviceFileName
+</span></span><span style=display:flex><span>        . $fileToUninstall uninstall
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    $fileToInstall = Join-Path <span style=color:#e6db74>&#34;$destDir\&#34;</span> $serviceFileName
+</span></span><span style=display:flex><span>    . $fileToInstall install
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>catch</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>throw</span> $_.Exception
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>try</span>{
+</span></span><span style=display:flex><span>    . $fileToInstall start
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>catch</span>{
+</span></span><span style=display:flex><span>    Write-Host <span style=color:#e6db74>&#34;$process_name was successfully installed, but could not be started. This is most likely because of a configuration error. Please check the Windows Event Log.&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The next part is to deploy the service. That is the easy part thanks to Ansible:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell><span style=display:flex><span>- name<span style=color:#960050;background-color:#1e0010>:</span> Install Stratos Chocolatey service
+</span></span><span style=display:flex><span>  win_chocolatey<span style=color:#960050;background-color:#1e0010>:</span> name=stratos source=http<span style=color:#960050;background-color:#1e0010>:</span>//dips-nuget/nuget/InternalSoftware state=present upgrade=True
+</span></span></code></pre></div><p>The <code>upgrade=True</code> flag will make sure that any new versions of the service get&rsquo;s rolled out.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/docker-garbage-collection-version-1-13-0-update/><span>←</span><span>Docker Garbage Collection version 1.13.0 update!</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/spawning-tfs2015-build-agents-with-docker/><span>Spawning TFS2015 Build Agents with Docker</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

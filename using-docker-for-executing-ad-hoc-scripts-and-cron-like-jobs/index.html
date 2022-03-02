@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Using Docker for executing ad-hoc scripts and cron-like jobs - Dev&Ops</title>
-<meta name=description content="Intro People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it. A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers.">
+<title>Using Docker for executing ad-hoc scripts and cron-like jobs - Dev&Ops</title><meta name=description content="Intro People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it. A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
@@ -12,7 +11,7 @@
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Using Docker for executing ad-hoc scripts and cron-like jobs">
 <meta property="og:description" content="Intro People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it. A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers.">
 <meta property="og:type" content="article">
@@ -27,59 +26,42 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Using Docker for executing ad-hoc scripts and cron-like jobs">
 <meta name=twitter:description content="Intro People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it. A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Nov 13, 2017</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Using Docker for executing ad-hoc scripts and cron-like jobs</h1>
-</header>
-<section class=post-content><h3 id=intro>Intro</h3>
-<p>People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it.
-A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers. As developers we should be able to use the language we want and abstract it away. The output is what matters.</p>
-<h3 id=the-case>The Case</h3>
-<p>First, let&rsquo;s look at the case. As readers of my blog know, I work with tools crossing the line between the Linux and Windows environments. That&rsquo;s why my team like Ansible. For provisioning Windows servers we use the <code>win_chocolatey</code> <a href=http://docs.ansible.com/ansible/latest/win_chocolatey_module.html>module</a> Ansible provides.
+</p><h1>Using Docker for executing ad-hoc scripts and cron-like jobs</h1></header><section class=post-content><h3 id=intro>Intro</h3><p>People use Docker to package applications and infrastructure dependencies for easy shipment - and it shines bright while doing it.
+A less talked about usecase for Docker is executing simple ad-hoc scripts and cron-type jobs, like nightly jobs on a build server. Since Docker isolates processes, we can be much more free to experiment with different languages and runtimes not only in our applications, but also our scripts without having to think about provisioning software to the target servers. As developers we should be able to use the language we want and abstract it away. The output is what matters.</p><h3 id=the-case>The Case</h3><p>First, let&rsquo;s look at the case. As readers of my blog know, I work with tools crossing the line between the Linux and Windows environments. That&rsquo;s why my team like Ansible. For provisioning Windows servers we use the <code>win_chocolatey</code> <a href=http://docs.ansible.com/ansible/latest/win_chocolatey_module.html>module</a> Ansible provides.
 We pull all the Chocolatey packages directly from the central Chocolatey repository. To be able to support offline provisioning of servers (as well as letting me sleep good at night knowing we have a backup) I need to script some syncing of the Chocolatey packages we use to our local ProGet server. Sounds easy, just write up some PowerShell and call it a day right?
-Nah. Too boring. Let&rsquo;s see if we can do something cool.</p>
-<h3 id=the-code>The Code</h3>
-<p>So grabbing the package names should be rather easy, just some string searching and digging in the Ansible files.
-The next step is to download the packages (including the package dependencies) and upload them to our NuGet server. Here we can use the NuGet Command Line tool directly, or Chocolatey. Both are now cross platform and works as well on NIX systems as it does on Windows. Throw in a Docker image and we can mix some scripts.</p>
-<p>A colleague of mine is working on a cool project called <a href=https://github.com/filipw/dotnet-script>dotnet-script</a>. In a nutshell, the project provides C# scripting based on dotnet core, with full debug support in Visual Studio Code (if you haven&rsquo;t checked it out, <a href=https://www.strathweb.com/2017/11/c-script-runner-for-net-core-2-0/>you should</a>). As we all know, dotnet core means Linux support, so after a quick PR to the project it now have a Dockerfile as well. Parsing some Ansible task files is easy when C# is the weapon.</p>
-<p>All Ansible roles installing Chocolatey packages looks like this:</p>
-<pre tabindex=0><code>   - name: Installing dotnet 4.6 Target Pack
-     win_chocolatey: name=dotnet4.6-targetpack source=&quot;{{ ChocoFeedUrl }}&quot;
-</code></pre><p>So the following parser code returns all the package names:</p>
-<pre tabindex=0><code>#! &quot;netcoreapp1.1&quot;
-#r &quot;nuget:NetStandard.Library,1.6.1&quot;
+Nah. Too boring. Let&rsquo;s see if we can do something cool.</p><h3 id=the-code>The Code</h3><p>So grabbing the package names should be rather easy, just some string searching and digging in the Ansible files.
+The next step is to download the packages (including the package dependencies) and upload them to our NuGet server. Here we can use the NuGet Command Line tool directly, or Chocolatey. Both are now cross platform and works as well on NIX systems as it does on Windows. Throw in a Docker image and we can mix some scripts.</p><p>A colleague of mine is working on a cool project called <a href=https://github.com/filipw/dotnet-script>dotnet-script</a>. In a nutshell, the project provides C# scripting based on dotnet core, with full debug support in Visual Studio Code (if you haven&rsquo;t checked it out, <a href=https://www.strathweb.com/2017/11/c-script-runner-for-net-core-2-0/>you should</a>). As we all know, dotnet core means Linux support, so after a quick PR to the project it now have a Dockerfile as well. Parsing some Ansible task files is easy when C# is the weapon.</p><p>All Ansible roles installing Chocolatey packages looks like this:</p><pre tabindex=0><code>   - name: Installing dotnet 4.6 Target Pack
+     win_chocolatey: name=dotnet4.6-targetpack source=&#34;{{ ChocoFeedUrl }}&#34;
+</code></pre><p>So the following parser code returns all the package names:</p><pre tabindex=0><code>#! &#34;netcoreapp1.1&#34;
+#r &#34;nuget:NetStandard.Library,1.6.1&#34;
 
-var rolesFolder = &quot;roles/&quot;;
+var rolesFolder = &#34;roles/&#34;;
 var packages = new HashSet&lt;string&gt;();
 
-var allFiles = Directory.GetFiles(rolesFolder, &quot;*.yaml&quot;, SearchOption.AllDirectories);
+var allFiles = Directory.GetFiles(rolesFolder, &#34;*.yaml&#34;, SearchOption.AllDirectories);
 
 foreach(var yamlFile in allFiles)
 {
     var textLines = File.ReadAllLines(yamlFile);
     foreach(var line in textLines)
     {
-        if(line.Contains(&quot;win_chocolatey&quot;) &amp;&amp; !line.ToLower().Contains(&quot;internalsoftware&quot;))
+        if(line.Contains(&#34;win_chocolatey&#34;) &amp;&amp; !line.ToLower().Contains(&#34;internalsoftware&#34;))
         {
             packages.Add(FetchPackageName(line));
         }
@@ -88,62 +70,45 @@ foreach(var yamlFile in allFiles)
 
 private string FetchPackageName(string line)
 {
-    var words = line.Split(' ');
+    var words = line.Split(&#39; &#39;);
     foreach(var word in words)
     {
-        if(word.Contains(&quot;name=&quot;))
+        if(word.Contains(&#34;name=&#34;))
         {
-            return word.Replace(&quot;name=&quot;, string.Empty);
+            return word.Replace(&#34;name=&#34;, string.Empty);
         }
     }
     return string.Empty;
 }
 
-File.WriteAllLines(&quot;scripts/nugetPackages.txt&quot;, packages);
-</code></pre><p>Writing that without a single <code>Console.Writeline()</code> for debug is a pretty nice experience.</p>
-<p>To download the packages and upload them to the local NuGet server a simple shell script does the trick:</p>
-<pre tabindex=0><code>#! /bin/bash
+File.WriteAllLines(&#34;scripts/nugetPackages.txt&#34;, packages);
+</code></pre><p>Writing that without a single <code>Console.Writeline()</code> for debug is a pretty nice experience.</p><p>To download the packages and upload them to the local NuGet server a simple shell script does the trick:</p><pre tabindex=0><code>#! /bin/bash
 
-filename=&quot;nugetPackages.txt&quot;
+filename=&#34;nugetPackages.txt&#34;
 
 while read -r line
 do
     nuget install -OutputDirectory . $line -Source https://chocolatey.org/api/v2/
     echo $line
-done &lt; &quot;$filename&quot;
+done &lt; &#34;$filename&#34;
 
 packages=$(find **/*.nupkg)
 
 for package in $packages
 do
-    choco push $package --api-key &quot;SomeAPIKeyYouCantHaveDearBlog&quot; --Source http://internalNugetServer/nuget/ExternalSoftware/ --force
+    choco push $package --api-key &#34;SomeAPIKeyYouCantHaveDearBlog&#34; --Source http://internalNugetServer/nuget/ExternalSoftware/ --force
 done
-</code></pre><p>Note that we use Nuget Command Line for downloading the package, while Chocolatey puts up less of a fuzz when pushing packages (throw in the <code>--force</code> flag and it just pushes, no questions asked).</p>
-<p>To glue it all together without having to install any dotnet tools on the Linux server, enter the power of Docker.</p>
-<pre tabindex=0><code>#! /bin/bash
+</code></pre><p>Note that we use Nuget Command Line for downloading the package, while Chocolatey puts up less of a fuzz when pushing packages (throw in the <code>--force</code> flag and it just pushes, no questions asked).</p><p>To glue it all together without having to install any dotnet tools on the Linux server, enter the power of Docker.</p><pre tabindex=0><code>#! /bin/bash
 
 docker run --name packages -v $(cd ../ &amp;&amp; pwd):/scripts:z andmos/dotnet-script scripts/GeneratePackagesFile.csx
-docker run --name packagesync --volumes-from=packages:z -w=&quot;/scripts/scripts&quot; andmos/choco ./DownloadFromChocoPushToProget.sh
+docker run --name packagesync --volumes-from=packages:z -w=&#34;/scripts/scripts&#34; andmos/choco ./DownloadFromChocoPushToProget.sh
 
 docker rm -v data
 docker rm -v packagesync
-</code></pre><p>Here we first use the the <code>andmos/dotnet-script</code> image to execute the parser script, digging out all Chocolatey packages from the Ansible roles. The Ansible repo is shared from the host to the container via the <code>-v</code> flag, mounting it in the workspace folder. Next, the workspace folder is mounted to the <code>andmos/choco</code> container, giving it access to the <code>nugetPackages.txt</code>. The <code>andmos/choco</code> provides access to NuGet Command Line and Chocolatey itself.</p>
-<p>Last but not least - we clean up after ourself. When writing self contained ad-hoc Docker pipelines like this it is important to take out the thrash.</p>
-<h3 id=summary>Summary</h3>
-<p>This code runs each night via a TeamCity build, syncing packages as we provision out new Chocolatey packages. The agent running it has only Docker installed, and that is enough. Docker provides a nice abstraction when executing simple scripts like this, making it easy to try out new languages without having to install a thousand runtimes on the servers. If I want to try out F# or Python next, it is as simple as switching out an Image. It is also really cool to see traditional Windows tools running smoothly on Linux.</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>Here we first use the the <code>andmos/dotnet-script</code> image to execute the parser script, digging out all Chocolatey packages from the Ansible roles. The Ansible repo is shared from the host to the container via the <code>-v</code> flag, mounting it in the workspace folder. Next, the workspace folder is mounted to the <code>andmos/choco</code> container, giving it access to the <code>nugetPackages.txt</code>. The <code>andmos/choco</code> provides access to NuGet Command Line and Chocolatey itself.</p><p>Last but not least - we clean up after ourself. When writing self contained ad-hoc Docker pipelines like this it is important to take out the thrash.</p><h3 id=summary>Summary</h3><p>This code runs each night via a TeamCity build, syncing packages as we provision out new Chocolatey packages. The agent running it has only Docker installed, and that is enough. Docker provides a nice abstraction when executing simple scripts like this, making it easy to try out new languages without having to install a thousand runtimes on the servers. If I want to try out F# or Python next, it is as simple as switching out an Image. It is also really cool to see traditional Windows tools running smoothly on Linux.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/bootstrapping-octopus-deploy-ssh-targets-with-dotnet-script/><span>←</span><span>Bootstrapping Octopus Deploy SSH targets with dotnet-script</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/associate-file-endings-with-languages-in-atom/><span>Associate file endings with languages in Atom</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

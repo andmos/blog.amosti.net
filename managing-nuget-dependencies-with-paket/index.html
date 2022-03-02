@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Managing NuGet dependencies with Paket - Dev&Ops</title>
-<meta name=description content="Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is NuGet and Chocolatey, everything stored in different feeds on the excellent ProGet server. For CI we build our code with TFS and Team City using some hand-made build scripts written in scriptcs, while deployment is done with good old Octopus Deploy.
+<title>Managing NuGet dependencies with Paket - Dev&Ops</title><meta name=description content="Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is NuGet and Chocolatey, everything stored in different feeds on the excellent ProGet server. For CI we build our code with TFS and Team City using some hand-made build scripts written in scriptcs, while deployment is done with good old Octopus Deploy.
 All this works perfectly in our in-house environments, everything is just a choco install away.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
@@ -13,7 +12,7 @@ All this works perfectly in our in-house environments, everything is just a choc
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Managing NuGet dependencies with Paket">
 <meta property="og:description" content="Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is NuGet and Chocolatey, everything stored in different feeds on the excellent ProGet server. For CI we build our code with TFS and Team City using some hand-made build scripts written in scriptcs, while deployment is done with good old Octopus Deploy.
 All this works perfectly in our in-house environments, everything is just a choco install away.">
@@ -31,55 +30,35 @@ All this works perfectly in our in-house environments, everything is just a choc
 <meta name=twitter:title content="Managing NuGet dependencies with Paket">
 <meta name=twitter:description content="Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is NuGet and Chocolatey, everything stored in different feeds on the excellent ProGet server. For CI we build our code with TFS and Team City using some hand-made build scripts written in scriptcs, while deployment is done with good old Octopus Deploy.
 All this works perfectly in our in-house environments, everything is just a choco install away.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Aug 7, 2015</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Managing NuGet dependencies with Paket</h1>
-</header>
-<section class=post-content><p>Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is <a href=https://www.nuget.org/>NuGet</a> and <a href=https://chocolatey.org/>Chocolatey</a>, everything stored in different feeds on the excellent <a href=http://inedo.com/proget/overview>ProGet</a> server. For CI we build our code with <a href=https://msdn.microsoft.com/en-us/vstudio/ff637362.aspx>TFS</a> and <a href=https://www.jetbrains.com/teamcity/>Team City</a> using some hand-made build scripts written in <a href=http://scriptcs.net/>scriptcs</a>, while deployment is done with good old <a href=https://octopusdeploy.com/>Octopus Deploy</a>.</p>
-<p>All this works perfectly in our in-house environments, everything is just a <code>choco install</code> away.
-The only catch her is that we want to ship these packages to our customers as standalone installations. To do this we have written some custom powershell-scripts that wraps chocolatey and points to a local packages-folder where the correct .nupkg-files for the applications are stored. Since we want to use this exact installation mechanism in our CI pipeline (aka eating your own dog food) we had to be creative.</p>
-<p>Chocolatey is great for installing software, but the easiest way to actually grab the .nupkg-files without installing them (and get the version number as a part of the .nupkg filename, chocolatey does not include this for some reason) is to use the NuGet CLI itself:</p>
-<pre><code>  nuget install mypackage-server -Source http://myproget -OutputDirectory &quot;C:\SetupScript\Packages&quot;
-</code></pre>
-<p>Here we ran in to a much debated issue: NuGet&rsquo;s way of managing dependencies. By default NuGet resolves the <strong>lowest</strong> available (and legal) version of all dependencies. I understand that this is a safe choice, but for CI we always want to test and deploy the latest version of all packages and its dependencies. The worst part is, after hours of googling and trying we found no way to force NuGet to use the highest available versions of dependencies. To solve this issue I turned to <a href=http://fsprojects.github.io/Paket/>Paket</a>.</p>
-<p>Paket is a wonderful project that takes care of dependencies in your project for you in a much more elegant (and Ruby-like) way then what NuGet itself does. Here is an example:</p>
-<pre><code>$ mkdir .paket
+</p><h1>Managing NuGet dependencies with Paket</h1></header><section class=post-content><p>Since we mainly write .NET code at work, the only real choice for packing dependencies and applications is <a href=https://www.nuget.org/>NuGet</a> and <a href=https://chocolatey.org/>Chocolatey</a>, everything stored in different feeds on the excellent <a href=http://inedo.com/proget/overview>ProGet</a> server. For CI we build our code with <a href=https://msdn.microsoft.com/en-us/vstudio/ff637362.aspx>TFS</a> and <a href=https://www.jetbrains.com/teamcity/>Team City</a> using some hand-made build scripts written in <a href=http://scriptcs.net/>scriptcs</a>, while deployment is done with good old <a href=https://octopusdeploy.com/>Octopus Deploy</a>.</p><p>All this works perfectly in our in-house environments, everything is just a <code>choco install</code> away.
+The only catch her is that we want to ship these packages to our customers as standalone installations. To do this we have written some custom powershell-scripts that wraps chocolatey and points to a local packages-folder where the correct .nupkg-files for the applications are stored. Since we want to use this exact installation mechanism in our CI pipeline (aka eating your own dog food) we had to be creative.</p><p>Chocolatey is great for installing software, but the easiest way to actually grab the .nupkg-files without installing them (and get the version number as a part of the .nupkg filename, chocolatey does not include this for some reason) is to use the NuGet CLI itself:</p><pre><code>  nuget install mypackage-server -Source http://myproget -OutputDirectory &quot;C:\SetupScript\Packages&quot;
+</code></pre><p>Here we ran in to a much debated issue: NuGet&rsquo;s way of managing dependencies. By default NuGet resolves the <strong>lowest</strong> available (and legal) version of all dependencies. I understand that this is a safe choice, but for CI we always want to test and deploy the latest version of all packages and its dependencies. The worst part is, after hours of googling and trying we found no way to force NuGet to use the highest available versions of dependencies. To solve this issue I turned to <a href=http://fsprojects.github.io/Paket/>Paket</a>.</p><p>Paket is a wonderful project that takes care of dependencies in your project for you in a much more elegant (and Ruby-like) way then what NuGet itself does. Here is an example:</p><pre><code>$ mkdir .paket
 $ wget https://github.com/fsprojects/Paket/releases/download/1.23.0/paket.exe -p .paket/
 $ touch paket.dependencies
-</code></pre>
-<p>In the <code>paket.dependencies</code> file, put in your dependencies like this:</p>
-<pre><code>source https://nuget.org/api/v2
+</code></pre><p>In the <code>paket.dependencies</code> file, put in your dependencies like this:</p><pre><code>source https://nuget.org/api/v2
 
 nuget Castle.Windsor-log4net &gt;= 3.2
 nuget NUnit
 
 github forki/FsUnit FsUnit.fs
-</code></pre>
-<p>To install dependencies:</p>
-<pre><code>$ .paket/paket.exe install
-</code></pre>
-<p>All dependencies (including correct, transitive dependencies in <strong>latest</strong> versions!) are stored in the <code>paket.lock</code> file:</p>
-<pre><code>NUGET
+</code></pre><p>To install dependencies:</p><pre><code>$ .paket/paket.exe install
+</code></pre><p>All dependencies (including correct, transitive dependencies in <strong>latest</strong> versions!) are stored in the <code>paket.lock</code> file:</p><pre><code>NUGET
   remote: https://nuget.org/api/v2
   specs:
     Castle.Core (3.3.3)
@@ -100,10 +79,7 @@ GITHUB
   remote: forki/FsUnit
   specs:
     FsUnit.fs (81d27fd09575a32c4ed52eadb2eeac5f365b8348)
-</code></pre>
-<p>The files end up in a folder called <code>Packages</code> with .npkg files and all, just how we like it.</p>
-<p>As a bonus, here is the powershell-script Octopus Deploys runs:</p>
-<pre><code>$SetupRoot = &quot;C:\SetupScript&quot;
+</code></pre><p>The files end up in a folder called <code>Packages</code> with .npkg files and all, just how we like it.</p><p>As a bonus, here is the powershell-script Octopus Deploys runs:</p><pre><code>$SetupRoot = &quot;C:\SetupScript&quot;
 $SetupPs1 = &quot;SetupRoot\Setup.ps1&quot;
 $OFS = &quot;`r`n&quot;
 
@@ -153,20 +129,10 @@ $ConfigContent = [xml]@&quot;
 $ConfigContent.Save($Config)
 
 &amp; $SetupRoot\Setup.ps1
-</code></pre>
-</section>
-<nav class=post-nav>
+</code></pre></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/build-and-publish-asciidoc-with-docker-and-nginx/><span>←</span><span>Build and publish AsciiDoc with Docker and nginx</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/docker-garbage-collection/><span>Docker Garbage Collection</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

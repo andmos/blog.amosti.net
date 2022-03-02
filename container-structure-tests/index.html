@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Container Structure Tests - Dev&Ops</title>
-<meta name=description content="A cool new project from Google Cloud Platform is Container Structure Tests. When working with containers, running tasks like unit tests as a part of the the container build stage is smart - and with Docker multi-stage builds available there is no excuse not to.
+<title>Container Structure Tests - Dev&Ops</title><meta name=description content="A cool new project from Google Cloud Platform is Container Structure Tests. When working with containers, running tasks like unit tests as a part of the the container build stage is smart - and with Docker multi-stage builds available there is no excuse not to.
 Including tests, the Dockerfile instructions itself will throw an exitcode if some of the preconditions change.
 Let&rsquo;s say we have the step
 COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config and it gets tampered with,">
@@ -15,7 +14,7 @@ COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config and 
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Container Structure Tests">
 <meta property="og:description" content="A cool new project from Google Cloud Platform is Container Structure Tests. When working with containers, running tasks like unit tests as a part of the the container build stage is smart - and with Docker multi-stage builds available there is no excuse not to.
 Including tests, the Dockerfile instructions itself will throw an exitcode if some of the preconditions change.
@@ -39,49 +38,29 @@ COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config and 
 Including tests, the Dockerfile instructions itself will throw an exitcode if some of the preconditions change.
 Let&rsquo;s say we have the step
 COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config and it gets tampered with,">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Mar 5, 2018</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Container Structure Tests</h1>
-</header>
-<section class=post-content><p>A cool new project from <a href=https://cloud.google.com/>Google Cloud Platform</a> is <a href=https://github.com/GoogleCloudPlatform/container-structure-test>Container Structure Tests</a>. When working with containers, running tasks like unit tests as a part of the the container build stage is smart - and with <a href=https://docs.docker.com/develop/develop-images/multistage-build/>Docker multi-stage builds</a> available there is no excuse not to.</p>
-<p>Including tests, the Dockerfile instructions itself will throw an exitcode if some of the preconditions change.</p>
-<p>Let&rsquo;s say we have the step</p>
-<pre tabindex=0><code>COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config
-</code></pre><p>and it gets tampered with,</p>
-<pre tabindex=0><code>COPY ReadingList.exe.config.fake /ReadingList/bin/Release/ReadingList.exe.config
-</code></pre><p>the daemon will throw an exitcode since <code>ReadingList.exe.config.fake</code> don&rsquo;t exist.</p>
-<p>So far so good. But what if the destination name gets tampered with, like this?</p>
-<pre tabindex=0><code>COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config.fake
-</code></pre><p>If the file is not touched anymore in the Dockerfile before a container is run from the image, the error won&rsquo;t be discovered before runtime. This is the one of the cases the container structure tests is meant to catch.</p>
-<p>The container structure tests will validate the structure of the container image and provides a good way to do regression tests on the build artifacts themselves, so we can catch errors before the image is pushed to the repository. These tests can be used to check the output of commands in an image, as well as verify metadata and contents of the filesystem.</p>
-<p>Let&rsquo;s take the example over. If the container image needs to have a config file at <code>/ReadingList/bin/Release/</code>, we can write some tests for it (and more):</p>
-<script src=https://gist.github.com/andmos/d63f2da228b2da60d0eff5a7d004ebb2.js></script>
+</p><h1>Container Structure Tests</h1></header><section class=post-content><p>A cool new project from <a href=https://cloud.google.com/>Google Cloud Platform</a> is <a href=https://github.com/GoogleCloudPlatform/container-structure-test>Container Structure Tests</a>. When working with containers, running tasks like unit tests as a part of the the container build stage is smart - and with <a href=https://docs.docker.com/develop/develop-images/multistage-build/>Docker multi-stage builds</a> available there is no excuse not to.</p><p>Including tests, the Dockerfile instructions itself will throw an exitcode if some of the preconditions change.</p><p>Let&rsquo;s say we have the step</p><pre tabindex=0><code>COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config
+</code></pre><p>and it gets tampered with,</p><pre tabindex=0><code>COPY ReadingList.exe.config.fake /ReadingList/bin/Release/ReadingList.exe.config
+</code></pre><p>the daemon will throw an exitcode since <code>ReadingList.exe.config.fake</code> don&rsquo;t exist.</p><p>So far so good. But what if the destination name gets tampered with, like this?</p><pre tabindex=0><code>COPY ReadingList.exe.config /ReadingList/bin/Release/ReadingList.exe.config.fake
+</code></pre><p>If the file is not touched anymore in the Dockerfile before a container is run from the image, the error won&rsquo;t be discovered before runtime. This is the one of the cases the container structure tests is meant to catch.</p><p>The container structure tests will validate the structure of the container image and provides a good way to do regression tests on the build artifacts themselves, so we can catch errors before the image is pushed to the repository. These tests can be used to check the output of commands in an image, as well as verify metadata and contents of the filesystem.</p><p>Let&rsquo;s take the example over. If the container image needs to have a config file at <code>/ReadingList/bin/Release/</code>, we can write some tests for it (and more):</p><script src=https://gist.github.com/andmos/d63f2da228b2da60d0eff5a7d004ebb2.js></script>
 <p><code>fileExistenceTests</code> can assert files in the container image, <code>metadataTest</code> can assert expected exposed ports etc.
-There are also categories for file content tests, command tests, environment variable tests and more.</p>
-<p>To run the tests on an image, use to official container:</p>
-<pre tabindex=0><code>docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/tests gcr.io/gcp-runtimes/container-structure-test:v0.2.1 -image andmos/readinglist -test.v /tests/imageTests/readinglist_container_tests_config.yaml
-</code></pre><p>The output looks similar to that of any other unit test Framework:</p>
-<pre tabindex=0><code>Using driver docker
+There are also categories for file content tests, command tests, environment variable tests and more.</p><p>To run the tests on an image, use to official container:</p><pre tabindex=0><code>docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/tests gcr.io/gcp-runtimes/container-structure-test:v0.2.1 -image andmos/readinglist -test.v /tests/imageTests/readinglist_container_tests_config.yaml
+</code></pre><p>The output looks similar to that of any other unit test Framework:</p><pre tabindex=0><code>Using driver docker
 === RUN   TestAll
 === RUN   TestAll/File_Existence_Test:_ReadingList.exe
 2018/03/05 18:08:31 Running tests for file /tests/imageTests/readinglist_container_tests_config.yaml
@@ -98,24 +77,13 @@ There are also categories for file content tests, command tests, environment var
 	structure_test.go:49: Total tests run: 5
 PASS
 </code></pre><p>I&rsquo;m planning to implement container structure tests as a last sanity check before an image is pushed.
-With <a href=https://travis-ci.org/>Travis</a> this can be done with ease:</p>
-<pre tabindex=0><code>script:
+With <a href=https://travis-ci.org/>Travis</a> this can be done with ease:</p><pre tabindex=0><code>script:
   - docker build -t andmos/readinglist .
   - docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/tests gcr.io/gcp-runtimes/container-structure-test:v0.2.1 -image andmos/readinglist -test.v  /tests/imageTests/readinglist_container_tests_config.yaml
-</code></pre><p>The project is rather new, but comming from Google I suspect it will get much more love in the future. It surely fills a hole regarding CI and CD in a container world.</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>The project is rather new, but comming from Google I suspect it will get much more love in the future. It surely fills a hole regarding CI and CD in a container world.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/how-the-sharing-economy-fits-in-to-my-life/><span>←</span><span>How the "sharing economy" fits into my everyday life</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/bootstrapping-octopus-deploy-ssh-targets-with-dotnet-script/><span>Bootstrapping Octopus Deploy SSH targets with dotnet-script</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

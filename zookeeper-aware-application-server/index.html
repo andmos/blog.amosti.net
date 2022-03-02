@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Zookeeper-aware application server - Dev&Ops</title>
-<meta name=description content="###The situation At work we use Apache Solr from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using SolrCloud. SolrCloud uses Apache ZooKeeper to keep track of config files, live nodes, coordination etc.">
+<title>Zookeeper-aware application server - Dev&Ops</title><meta name=description content="###The situation At work we use Apache Solr from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using SolrCloud. SolrCloud uses Apache ZooKeeper to keep track of config files, live nodes, coordination etc.">
 <meta name=author content="Andreas Mosti">
 <link rel="preload stylesheet" as=style href=https://andmos.github.io/blog.amosti.net/app.min.css>
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/theme.png>
@@ -12,7 +11,7 @@
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Zookeeper-aware application server">
 <meta property="og:description" content="###The situation At work we use Apache Solr from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using SolrCloud. SolrCloud uses Apache ZooKeeper to keep track of config files, live nodes, coordination etc.">
 <meta property="og:type" content="article">
@@ -27,38 +26,25 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Zookeeper-aware application server">
 <meta name=twitter:description content="###The situation At work we use Apache Solr from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using SolrCloud. SolrCloud uses Apache ZooKeeper to keep track of config files, live nodes, coordination etc.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Apr 13, 2015</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Zookeeper-aware application server</h1>
-</header>
-<section class=post-content><p>###The situation
-At work we use <a href=http://lucene.apache.org/solr/>Apache Solr</a> from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using <a href=https://wiki.apache.org/solr/SolrCloud>SolrCloud</a>. SolrCloud uses <a href=https://zookeeper.apache.org/>Apache ZooKeeper</a> to keep track of config files, live nodes, coordination etc. Zookeeper is a distributed file system that supports putting watchers on its files, thus calling back to the application when a file changes.</p>
-<p>As a abstraction layer we use <a href=https://github.com/mausch/SolrNet>SolrNet</a> to talk to Solr. The only problem here is that SolrNet has no support for SolrCloud (<a href=https://github.com/mausch/SolrNet/pull/187>yet!</a>), which means that there is no good way to talk to the cluster, oure system&rsquo;s application server must connect to a single, specified node. If this node goes down, we lose the connection to the cluster. So we have redundancy in SolrCloud, but the consumer can&rsquo;t use it? We can&rsquo;t live with that.</p>
-<p>###The solution
-We decided to write a ZooKeeper-API ourself, letting the application server receive a suitable Solr-node on startup. If this node goes down in production, a watcher on the clusterstate-file kicks inn and changes the active Solr-node, giving us failover without restart.</p>
-<p>There are some ways to talk to Zookeeper from .NET, mainly the <a href=https://www.nuget.org/packages/ZooKeeper.Net/>Apache ZooKeeper .NET Client</a> package on NuGet. In this case, I decided to exploit the opportunity to test out <a href=http://www.ikvm.net/>IKVM</a>, a (magical) project that let&rsquo;s you convert Java JAR-files to DLLs. Yeah.</p>
-<p>Here is some code from the API:</p>
-<pre><code>using System;
+</p><h1>Zookeeper-aware application server</h1></header><section class=post-content><p>###The situation
+At work we use <a href=http://lucene.apache.org/solr/>Apache Solr</a> from our application server to index and offer search in documents. A LOT of documents. The largest customer of our system has as much as 130 million documents, and the amount keeps growing exponentially. With this in mind, we knew early that we had to shard up and cluster the Solr-collection, this meant using <a href=https://wiki.apache.org/solr/SolrCloud>SolrCloud</a>. SolrCloud uses <a href=https://zookeeper.apache.org/>Apache ZooKeeper</a> to keep track of config files, live nodes, coordination etc. Zookeeper is a distributed file system that supports putting watchers on its files, thus calling back to the application when a file changes.</p><p>As a abstraction layer we use <a href=https://github.com/mausch/SolrNet>SolrNet</a> to talk to Solr. The only problem here is that SolrNet has no support for SolrCloud (<a href=https://github.com/mausch/SolrNet/pull/187>yet!</a>), which means that there is no good way to talk to the cluster, oure system&rsquo;s application server must connect to a single, specified node. If this node goes down, we lose the connection to the cluster. So we have redundancy in SolrCloud, but the consumer can&rsquo;t use it? We can&rsquo;t live with that.</p><p>###The solution
+We decided to write a ZooKeeper-API ourself, letting the application server receive a suitable Solr-node on startup. If this node goes down in production, a watcher on the clusterstate-file kicks inn and changes the active Solr-node, giving us failover without restart.</p><p>There are some ways to talk to Zookeeper from .NET, mainly the <a href=https://www.nuget.org/packages/ZooKeeper.Net/>Apache ZooKeeper .NET Client</a> package on NuGet. In this case, I decided to exploit the opportunity to test out <a href=http://www.ikvm.net/>IKVM</a>, a (magical) project that let&rsquo;s you convert Java JAR-files to DLLs. Yeah.</p><p>Here is some code from the API:</p><pre><code>using System;
 using System.Diagnostics.CodeAnalysis;
 using Common.Logging;
 using org.apache.zookeeper;
@@ -214,9 +200,7 @@ public class ZookeeperNodeDataChangeWatcher : Watcher, org.apache.zookeeper.Asyn
         GC.SuppressFinalize(this);
     }
 }
-</code></pre>
-<p>The implementation of the Clusterstate-watcher:</p>
-<pre><code>using System;
+</code></pre><p>The implementation of the Clusterstate-watcher:</p><pre><code>using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -363,28 +347,11 @@ public class ZooKeeperClusterstateWatcher
 }
 
 public delegate void ActiveSolrCollectionChangedDelegate(object sender, ActiveSolrCollectionChangedDelegateArgs args);
-</code></pre>
-<p>From code we simply read out <code>ActiveSolrCollection.SolrCollection.LeaderNode</code>.</p>
-<blockquote>
-<p>NOTE: In retrospect, we ended up rewriting and using the <a href=https://www.nuget.org/packages/ZooKeeper.Net/>Apache ZooKeeper .NET Client</a> package instead, simply because IKVM makes much mess, giving us dependencies to a lot of DLLs and so on.</p>
-</blockquote>
-<h3 id=some-slides>Some slides</h3>
-<p>I ended up giving a short talk about the work as well as presenting extension that can be made. In the future I will look at ZooKeeper as a place to place distributed config for services, as well as service discovery.</p>
-<iframe src=//www.slideshare.net/slideshow/embed_code/46646103 width=425 height=355 frameborder=0 marginwidth=0 marginheight=0 scrolling=no style="border:1px solid #ccc;border-width:1px;margin-bottom:5px;max-width:100%" allowfullscreen></iframe> <div style=margin-bottom:5px> <strong> <a href=//www.slideshare.net/mostii/zookeeper-aware title="Zookeeper-aware application server" target=_blank>Zookeeper-aware application server</a> </strong> from <strong><a href=//www.slideshare.net/mostii target=_blank>Andreas Mosti</a></strong> </div>
-<p>This work is inspired by the work of the guys over at <a href=http://www.palladiumconsulting.com/2014/06/using-zookeeper-from-net-ikvm-task/>Palladium Consulting</a>.</p>
-</section>
-<nav class=post-nav>
+</code></pre><p>From code we simply read out <code>ActiveSolrCollection.SolrCollection.LeaderNode</code>.</p><blockquote>
+<p>NOTE: In retrospect, we ended up rewriting and using the <a href=https://www.nuget.org/packages/ZooKeeper.Net/>Apache ZooKeeper .NET Client</a> package instead, simply because IKVM makes much mess, giving us dependencies to a lot of DLLs and so on.</p></blockquote><h3 id=some-slides>Some slides</h3><p>I ended up giving a short talk about the work as well as presenting extension that can be made. In the future I will look at ZooKeeper as a place to place distributed config for services, as well as service discovery.</p><iframe src=//www.slideshare.net/slideshow/embed_code/46646103 width=425 height=355 frameborder=0 marginwidth=0 marginheight=0 scrolling=no style="border:1px solid #ccc;border-width:1px;margin-bottom:5px;max-width:100%" allowfullscreen></iframe> <div style=margin-bottom:5px> <strong> <a href=//www.slideshare.net/mostii/zookeeper-aware title="Zookeeper-aware application server" target=_blank>Zookeeper-aware application server</a> </strong> from <strong><a href=//www.slideshare.net/mostii target=_blank>Andreas Mosti</a></strong> </div><p>This work is inspired by the work of the guys over at <a href=http://www.palladiumconsulting.com/2014/06/using-zookeeper-from-net-ikvm-task/>Palladium Consulting</a>.</p></section><nav class=post-nav>
 <a class=prev href=https://andmos.github.io/blog.amosti.net/updating-a-solrcloud-schema-in-a-live-enviroment/><span>←</span><span>Updating a SolrCloud schema in a live enviroment</span></a>
 <a class=next href=https://andmos.github.io/blog.amosti.net/how-i-read/><span>How I Read</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>

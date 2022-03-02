@@ -3,8 +3,7 @@
 <meta charset=utf-8>
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Backing up API data to GitHub with Flat-Data - Dev&Ops</title>
-<meta name=description content="For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.
+<title>Backing up API data to GitHub with Flat-Data - Dev&Ops</title><meta name=description content="For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.
 I wrote a blog post about this setup and my technique with regards to reading, which, upon re-reading, I see that both my technique for reading and writing-skills has improve, so that&rsquo;s that.
 In 2017 Atlassian acquired Trello, and safe to say, thing are starting to become more &ldquo;enterprisey&rdquo; over there.">
 <meta name=author content="Andreas Mosti">
@@ -14,7 +13,7 @@ In 2017 Atlassian acquired Trello, and safe to say, thing are starting to become
 <link rel=preload as=image href=https://andmos.github.io/blog.amosti.net/github.svg>
 <link rel=icon href=https://andmos.github.io/blog.amosti.net/favicon.ico>
 <link rel=apple-touch-icon href=https://andmos.github.io/blog.amosti.net/apple-touch-icon.png>
-<meta name=generator content="Hugo 0.92.2">
+<meta name=generator content="Hugo 0.93.0">
 <meta property="og:title" content="Backing up API data to GitHub with Flat-Data">
 <meta property="og:description" content="For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.
 I wrote a blog post about this setup and my technique with regards to reading, which, upon re-reading, I see that both my technique for reading and writing-skills has improve, so that&rsquo;s that.
@@ -35,65 +34,31 @@ In 2017 Atlassian acquired Trello, and safe to say, thing are starting to become
 <meta name=twitter:description content="For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.
 I wrote a blog post about this setup and my technique with regards to reading, which, upon re-reading, I see that both my technique for reading and writing-skills has improve, so that&rsquo;s that.
 In 2017 Atlassian acquired Trello, and safe to say, thing are starting to become more &ldquo;enterprisey&rdquo; over there.">
-</head>
-<body class=not-ready data-menu=true>
+</head><body class=not-ready data-menu=true>
 <header class=header>
 <p class=logo>
 <a class=site-name href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a><a class=btn-dark></a>
-</p>
-<script>let bodyClx=document.body.classList,btnDark=document.querySelector('.btn-dark'),sysDark=window.matchMedia('(prefers-color-scheme: dark)'),darkVal=localStorage.getItem('dark'),setDark=a=>{bodyClx[a?'add':'remove']('dark'),localStorage.setItem('dark',a?'yes':'no')};setDark(darkVal?darkVal==='yes':sysDark.matches),requestAnimationFrame(()=>bodyClx.remove('not-ready')),btnDark.addEventListener('click',()=>setDark(!bodyClx.contains('dark'))),sysDark.addEventListener('change',a=>setDark(a.matches))</script>
+</p><script>let bodyClx=document.body.classList,btnDark=document.querySelector(".btn-dark"),sysDark=window.matchMedia("(prefers-color-scheme: dark)"),darkVal=localStorage.getItem("dark"),setDark=e=>{bodyClx[e?"add":"remove"]("dark"),localStorage.setItem("dark",e?"yes":"no")};setDark(darkVal?darkVal==="yes":sysDark.matches),requestAnimationFrame(()=>bodyClx.remove("not-ready")),btnDark.addEventListener("click",()=>setDark(!bodyClx.contains("dark"))),sysDark.addEventListener("change",e=>setDark(e.matches))</script>
 <nav class=menu>
 <a href=/blog.amosti.net/about/>About Andreas</a>
-</nav>
-<nav class=social>
+</nav><nav class=social>
 <a class=twitter style=--url:url(./twitter.svg) href=https://twitter.com/amostii target=_blank></a>
 <a class=github style=--url:url(./github.svg) href=https://github.com/andmos target=_blank></a>
-</nav>
-</header>
-<main class=main>
+</nav></header><main class=main>
 <article class=post-single>
 <header class=post-title>
 <p>
 <time>Jan 17, 2022</time>
 <span>Andreas Mosti</span>
-</p>
-<h1>Backing up API data to GitHub with Flat-Data</h1>
-</header>
-<section class=post-content><p>For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.</p>
-<p>I <a href=https://blog.amosti.net/how-i-read/>wrote a blog post</a> about this setup and my technique with regards to reading, which, upon re-reading, I see that both my technique for reading and writing-skills has improve, so that&rsquo;s that.</p>
-<p>In 2017 <a href="https://techcrunch.com/2017/01/09/atlassian-acquires-trello/?guccounter=1&guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&guce_referrer_sig=AQAAAB4EB-u4iDYnVbIaNgQ5Zc3vh2a4oO12KL7tXvnrIAjHpVo76z6XqXP_F2I7-TDusMGfPvzMr21IRMIyUbenmxznHq_Ap4RcAzuG0yRLxve7Kc8naDdpLEgavPQkU7wuxfOIet-bTDAHjct5eB8DZujMtQiVKaZ2JSq1ji7v7Ypy">Atlassian acquired Trello</a>, and safe to say, thing are starting to become more &ldquo;enterprisey&rdquo; over there.</p>
-<p>I figured I won&rsquo;t be staying with Trello forever, and the amount of sunk-cost I have compounded in my simple reading list is astonishing. After some grooming, the backlog has currently 242 items and my done list has 450 entries.</p>
-<p>What can I say, I like to read.</p>
-<p>Some years ago I began my humble planning for moving away from Trello by writing a <a href=https://github.com/andmos/ReadingList>wrapper API service</a> for the reading list,
-using the Trello API itself as repository layer, so the switch to some other service could be easier. Maybe this API will act on top of something like SQLite or Firebase, who knows. To make sure I always had a copy of the data from Trello, I wrote a small bash-script with some <code>curl</code> calls and set up a cronjob. Now cronjobs are messy, I need to remember that I have it running, correct it if it runs into some error, and - after all - back up the data that comes from it.</p>
-<p>Searching for a better solution than bash and cronjobs, the next step on this pet project of mine came February 2021, when GitHub releases a cool project called <a href=https://next.github.com/projects/flat-data>Flat-Data</a>.</p>
-<p>In the projects own words:</p>
-<blockquote>
-<p>Flat Data is a GitHub action which makes it easy to fetch data and commit it to your repository as flatfiles. The action is intended to be run on a schedule, retrieving data from any supported target and creating a commit if there is any change to the fetched data.</p>
-</blockquote>
-<p>So in a nutshell, Flat-Data allows us to set up a simple GitHub Action, point it at some data source (like an API or SQL database), query the data, run some processing on it, and have it checked in to Git. A great tool for the data scientists I would
-imagine, or for a guy who just want to back up his reading list from an over-engineered API layer on top of Trello.</p>
-<p>It&rsquo;s easy to get started. All we need is a repository and a GitHub Action.
-My repo is <a href=https://github.com/andmos/ReadingList-Data>ReadingList-Data</a> and contains a few files: <code>backlog.json</code>, <code>done.json</code>, <code>reading.json</code> and <code>postprocess.js</code>.</p>
-<p>The GitHub Action itself using Flat-Data looks like this:</p>
-<script src=https://gist.github.com/andmos/00fe8179aac87a805e2d4d12a749058e.js></script>
+</p><h1>Backing up API data to GitHub with Flat-Data</h1></header><section class=post-content><p>For the last 10 years or so I have used Trello as my preferred service to keep track of my reading.</p><p>I <a href=https://blog.amosti.net/how-i-read/>wrote a blog post</a> about this setup and my technique with regards to reading, which, upon re-reading, I see that both my technique for reading and writing-skills has improve, so that&rsquo;s that.</p><p>In 2017 <a href="https://techcrunch.com/2017/01/09/atlassian-acquires-trello/?guccounter=1&guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&guce_referrer_sig=AQAAAB4EB-u4iDYnVbIaNgQ5Zc3vh2a4oO12KL7tXvnrIAjHpVo76z6XqXP_F2I7-TDusMGfPvzMr21IRMIyUbenmxznHq_Ap4RcAzuG0yRLxve7Kc8naDdpLEgavPQkU7wuxfOIet-bTDAHjct5eB8DZujMtQiVKaZ2JSq1ji7v7Ypy">Atlassian acquired Trello</a>, and safe to say, thing are starting to become more &ldquo;enterprisey&rdquo; over there.</p><p>I figured I won&rsquo;t be staying with Trello forever, and the amount of sunk-cost I have compounded in my simple reading list is astonishing. After some grooming, the backlog has currently 242 items and my done list has 450 entries.</p><p>What can I say, I like to read.</p><p>Some years ago I began my humble planning for moving away from Trello by writing a <a href=https://github.com/andmos/ReadingList>wrapper API service</a> for the reading list,
+using the Trello API itself as repository layer, so the switch to some other service could be easier. Maybe this API will act on top of something like SQLite or Firebase, who knows. To make sure I always had a copy of the data from Trello, I wrote a small bash-script with some <code>curl</code> calls and set up a cronjob. Now cronjobs are messy, I need to remember that I have it running, correct it if it runs into some error, and - after all - back up the data that comes from it.</p><p>Searching for a better solution than bash and cronjobs, the next step on this pet project of mine came February 2021, when GitHub releases a cool project called <a href=https://next.github.com/projects/flat-data>Flat-Data</a>.</p><p>In the projects own words:</p><blockquote>
+<p>Flat Data is a GitHub action which makes it easy to fetch data and commit it to your repository as flatfiles. The action is intended to be run on a schedule, retrieving data from any supported target and creating a commit if there is any change to the fetched data.</p></blockquote><p>So in a nutshell, Flat-Data allows us to set up a simple GitHub Action, point it at some data source (like an API or SQL database), query the data, run some processing on it, and have it checked in to Git. A great tool for the data scientists I would
+imagine, or for a guy who just want to back up his reading list from an over-engineered API layer on top of Trello.</p><p>It&rsquo;s easy to get started. All we need is a repository and a GitHub Action.
+My repo is <a href=https://github.com/andmos/ReadingList-Data>ReadingList-Data</a> and contains a few files: <code>backlog.json</code>, <code>done.json</code>, <code>reading.json</code> and <code>postprocess.js</code>.</p><p>The GitHub Action itself using Flat-Data looks like this:</p><script src=https://gist.github.com/andmos/00fe8179aac87a805e2d4d12a749058e.js></script>
 <p>Every Monday afternoon this action runs, fetches the current status from the reading list API, runs it through the post-processor
-script (a simple Deno script that only formats the JSON) and creates commits with the changes. It could not be simpler.</p>
-<p>As a bonus the commit history works as a great timeline to see when a book was added to the backlog or I was done reading it.</p>
-<p><img src=https://user-images.githubusercontent.com/1283556/149825223-9894be37-ff14-4788-92dd-e3eb654e06cd.png alt=Commit-history></p>
-<p>This is a quite simple and banal use case for Flat-Data, but hopefully it will inspire someone out there.</p>
-</section>
-<nav class=post-nav>
+script (a simple Deno script that only formats the JSON) and creates commits with the changes. It could not be simpler.</p><p>As a bonus the commit history works as a great timeline to see when a book was added to the backlog or I was done reading it.</p><p><img src=https://user-images.githubusercontent.com/1283556/149825223-9894be37-ff14-4788-92dd-e3eb654e06cd.png alt=Commit-history></p><p>This is a quite simple and banal use case for Flat-Data, but hopefully it will inspire someone out there.</p></section><nav class=post-nav>
 <a class=next href=https://andmos.github.io/blog.amosti.net/deterministic-systems-with-nix/><span>Deterministic systems with Nix</span><span>→</span></a>
-</nav>
-</article>
-</main>
-<footer class=footer>
-<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p>
-<p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p>
-<p>
+</nav></article></main><footer class=footer>
+<p>&copy; 2022 <a href=https://andmos.github.io/blog.amosti.net>Dev&Ops</a></p><p>Powered by <a href=https://gohugo.io/ rel=noopener target=_blank>Hugo️️</a>️</p><p>
 <a href=https://github.com/nanxiaobei/hugo-paper rel=noopener target=_blank>Paper 5.1</a>
-</p>
-</footer>
-</body>
-</html>
+</p></footer></body></html>
